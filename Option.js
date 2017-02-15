@@ -1,0 +1,109 @@
+"use strict";
+
+var Data = require("lazuli-data/index.js");
+
+/**
+* To represent a single-valued option field, supported by an LoV
+*/
+module.exports = Data.Text.clone({
+    id: "Option",
+    css_type: "dropdown",
+    search_oper_list: "sy.search_oper_list_option",
+    auto_search_oper: "EQ",
+    unknown_label: "[unknown]: ",
+//    tb_span: 2,
+    tb_input_list: "input-medium",
+    data_length: 10,
+    flexbox_size: 4,
+    allow_unchanged_inactive_value: true,
+});
+
+
+module.exports.defbind("validateOption", "validate", function () {
+    var item;
+    var val = this.get();
+
+    try {
+        this.getLoV();
+    } catch (ignore) {
+        this.messages.add({
+            type: "E",
+            text: "error with lov",
+        });
+        return;
+    }
+    if (!this.lov) {
+        this.messages.add({
+            type: "E",
+            text: "no lov found",
+        });
+    } else if (val) {                // Only do special validation is non-blank
+        item = this.lov.getItem(val);
+        if (item) {
+            this.text = item.label;
+        } else {
+            this.text = this.unknown_label + val;
+            this.messages.add({
+                type: "E",
+                text: "invalid option: " + val,
+            });
+            this.debug("invalid option: " + val);
+        }
+    }
+});
+
+
+module.exports.override("getTextFromVal", function () {
+    this.text = "";
+    this.validate();
+    return this.text;
+});
+
+
+module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
+    var css_class = this.getInputSizeCSSClass(form_type); /* TB£: "form-control" */
+    try {
+        this.getLoV();
+    } catch (ignore) {
+        return;
+    }
+    if (this.lov) {
+        if (this.render_radio) {
+            this.lov.renderRadio(div, render_opts, this.val, this.getControl(), css_class,
+                this.mandatory);
+        } else {
+            this.lov.renderDropdown(div, render_opts, this.val, this.getControl(), css_class,
+                this.mandatory);
+        }
+    }
+});
+
+
+module.exports.override("getDBTextExpr", function (alias) {
+    return "(SELECT ZI.text FROM sy_list_item ZI WHERE ZI.list = '" + this.list + "' AND ZI.id = " +
+        (alias ? alias + (this.sql_function ? "_" : ".") : "") + this.id + ")";
+});
+
+
+module.exports.override("addColumnToTable", function (query_table, col_spec) {
+    var column = Data.Text.addColumnToTable.call(this, query_table, col_spec);
+    if (this.list) {
+        column.order_term = "(SELECT ZI.seq_number FROM sy_list_item ZI WHERE ZI.list = '" + this.list + "' AND ZI.id = " +
+            query_table.alias + (this.sql_function ? "_" : ".") + this.id + ")";
+    }
+    return column;
+});
+
+
+module.exports.override("generateTestValue", function (session) {
+    var i;
+    var lov = Data.LoV.getListLoV(this.list);
+    if (!lov || lov.length() === 0) {
+        return "";
+    }
+    i = Math.floor(Math.random() * lov.length());
+    if (!lov.get(i)) {
+        this.throwError("Invalid LoV item: " + i + " for field " + this);
+    }
+    return lov.get(i).id;
+});
