@@ -127,25 +127,28 @@ module.exports.define("isAfter", function (date) {
 });
 
 
+module.exports.define("beforeSet", function (val) {
+    if (!val) {
+        val = "";
+    } else if (typeof val === "object" && typeof val.getFullYear === "function") {
+        val = val.format(this.internal_format);
+    } else if (typeof val === "string") {
+        val = this.parse(val);
+        if (!Date.isValid(val, this.internal_format)
+                && Date.isValid(val, this.update_format)) {
+            val = Date.parseString(val, this.update_format).format(this.internal_format);
+        }
+    }
+    return val;
+});
+
 module.exports.override("setInitial", function (new_val) {
-    Data.Text.setInitial.call(this, new_val);
-    this.val = this.parse(this.val);
+    Data.Text.setInitial.call(this, this.beforeSet(new_val));
 });
 
 
 module.exports.override("set", function (new_val) {
-    if (typeof new_val === "object" && typeof new_val.getFullYear === "function") {
-        new_val = new_val.internal();
-    } else if (typeof new_val === "string") {
-        new_val = this.parse(new_val);
-        if (!Date.isValid(new_val, this.internal_format)
-                && Date.isValid(new_val, this.update_format)) {
-            new_val = Date.parseString(new_val, this.update_format).format(this.internal_format);
-        }
-    } else if (!new_val) {
-        new_val = "";
-    }
-    Data.Text.set.call(this, new_val);
+    Data.Text.set.call(this, this.beforeSet(new_val));
 });
 
 

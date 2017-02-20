@@ -355,7 +355,7 @@ module.exports.define("getLoVInternal", function (spec) {
     spec.collection_id = this.collection_id || this.config_item;
     spec.label_prop = this.label_prop;
     spec.active_prop = this.active_prop;
-    spec.connection = this.owner.connection;
+    spec.connection = this.owner && this.owner.connection;
     // include this.owner.connection - to use Transaction's connection if within a transaction
     if (spec.entity_id) {
         entity = Data.Entity.getEntity(this.ref_entity);
@@ -436,6 +436,7 @@ module.exports.define("getMessageManager", function () {
         this.messages = Data.MessageManagerField.clone({
             id: this.id,
             field: this,
+            instance: true,
         });
     }
     return this.messages;
@@ -453,7 +454,7 @@ module.exports.define("isValid", function (modified_only) {
     if (!this.messages) {
         return true;
     }
-    return !this.messages.error_recorded_since_clear;
+    return !this.messages.error_recorded;
 });
 
 
@@ -535,11 +536,12 @@ module.exports.define("getText", function () {
 * @return [config_item][this.get()].title as a string, otherwise '[unknown]'
 */
 module.exports.define("getConfigItemText", function (config_item, val) {
-    var obj;
+    var obj = Core.Base.getCollection(config_item);
     var label_prop = this.label_prop || "title";
 
-    this.throwError("not implemented");
-    // obj = require("lazuli/base/OrderedMap").getCollection(config_item);
+    if (typeof obj !== "object") {
+        this.throwError("not a collection: " + config_item);
+    }
     obj = obj.get(val);
     if (typeof obj !== "object") {
         this.throwError(val + " not found in " + config_item);
@@ -572,7 +574,7 @@ module.exports.define("getDBTextExpr", function (alias) {
 * @return true if this field is editable, otherwise false
 */
 module.exports.define("isEditable", function () {
-    return this.editable && !this.fixed_key && (this.owner.modifiable !== false);
+    return this.editable && !this.fixed_key && (!this.owner || this.owner.modifiable !== false);
 });
 
 
@@ -680,8 +682,8 @@ module.exports.define("appendClientSideProperties", function (obj) {
 module.exports.define("addClientSideProperties", function (span, render_opts) {
     var obj = {};
     this.appendClientSideProperties(obj);
-    Object.keys(obj).forEach(function (key, value) {
-        if (value === null || value === undefined) {
+    Object.keys(obj).forEach(function (key) {
+        if (obj[key] === null || obj[key] === undefined) {
             delete obj[key];
         }
     });

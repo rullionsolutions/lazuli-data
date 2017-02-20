@@ -53,14 +53,15 @@ module.exports.override("isAfter", function (date) {
 });
 
 
-module.exports.override("set", function (new_val) {
-    this.debug("set() new_val: " + new_val);
-    if (new_val === "|") {
-        new_val = "";            // this is blank value
-    } else {
-        new_val = new_val.replace("|", " ");
+module.exports.override("beforeSet", function (val) {
+    if (typeof val === "string") {
+        if (val === "|") {
+            val = "";            // this is blank value
+        } else {
+            val = val.replace("|", " ");
+        }
     }
-    return Data.Date.set.call(this, new_val);
+    return Data.Date.beforeSet.call(this, val);
 });
 
 

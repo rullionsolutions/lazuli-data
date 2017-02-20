@@ -4,7 +4,7 @@
   "description": "Data Model base objects",
   "main": "index.js",
   "scripts": {
-    "test": "nodeunit test.js"
+    "test": "nodeunit test/Transaction.js"
   },
   "repository": {
     "type": "git",

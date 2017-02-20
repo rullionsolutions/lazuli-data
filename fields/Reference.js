@@ -40,23 +40,21 @@ module.exports.override("addToPage", function (page) {
 
 
 module.exports.override("getKeyPieces", function () {
-    return Data.Entity.getEntity(this.ref_entity).getKeyPieces();
+    return Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity).getKeyPieces();
 });
 
 
 module.exports.override("getDataLength", function () {
     if (typeof this.data_length !== "number") {
-        if (!Data.Entity.getEntity(this.ref_entity)) {
-            this.throwError("unrecognized ref_entity: " + this.ref_entity + " in: " + this.owner + "." + this.id);
-        }
-        this.data_length = Data.Entity.getEntity(this.ref_entity).getKeyLength();
+        this.data_length = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity)
+            .getKeyLength();
     }
     return this.data_length;
 });
 
 
 module.exports.override("getDBTextExpr", function (alias) {
-    var ref_entity = Data.Entity.getEntityThrowIfUnrecognized(this.ref_entity);
+    var ref_entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
     return "(SELECT " + ref_entity.getPatternConcatExpr("ZR") + " FROM " + ref_entity.table + " ZR WHERE ZR._key = " +
         (alias ? alias + (this.sql_function ? "_" : ".") : "") + this.id + ")";
 });
@@ -117,7 +115,7 @@ module.exports.define("getRow", function () {
                 this.owner.trans.isInCache(this.ref_entity, ref_val))) {
             return this.owner.trans.getActiveRow(this.ref_entity, ref_val);
         }
-        return Data.Entity.getEntity(this.ref_entity).getRow(ref_val);
+        return Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity).getRow(ref_val);
     }
     return null;
 });
@@ -134,7 +132,7 @@ module.exports.defbind("validateReference", "validate", function () {
         });
         return;
     }
-    if (!Data.Entity.getEntity(this.ref_entity)) {
+    if (!Data.Entity.entities.get(this.ref_entity)) {
         this.messages.add({
             type: "E",
             text: "ref_entity property value invalid: " + this.ref_entity,
@@ -185,7 +183,8 @@ module.exports.override("getTextFromVal", function () {
 
 
 module.exports.override("getURLFromVal", function () {
-    var display_page = Data.Entity.getEntity(this.ref_entity).getDisplayPage();
+    var display_page = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity)
+            .getDisplayPage();
     var url = "";
     var this_val = this.getRefVal();
 
@@ -310,15 +309,15 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     var display_url;
     var context_url;
 
-    if (!this_val || !this.ref_entity || !Data.Entity.getEntity(this.ref_entity)) {
+    if (!this_val || !this.ref_entity || !Data.Entity.entities.get(this.ref_entity)) {
         return null;
     }
-    display_page = Data.Entity.getEntity(this.ref_entity).getDisplayPage();
+    display_page = Data.Entity.entities.get(this.ref_entity).getDisplayPage();
     if (!display_page) {
         return null;
     }
     if (!cached_record) {
-        cached_record = Data.Entity.getEntity(this.ref_entity).getSecurityRecord(session, this_val);
+        cached_record = Data.Entity.entities.get(this.ref_entity).getSecurityRecord(session, this_val);
     }
     if (UI.Page.getPage(this.ref_entity + "_context") && UI.Page.getPage(this.ref_entity + "_context").allowed(session, this_val, cached_record).access) {
 //        context_url = "modal&page_id=" + this.ref_entity + "_context&page_key=" + this_val;
@@ -362,7 +361,7 @@ module.exports.define("isAutocompleter", function () {
     if (typeof this.render_autocompleter === "boolean") {
         return this.render_autocompleter;
     }
-    entity = Data.Entity.getEntityThrowIfUnrecognized(this.ref_entity);
+    entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
     return (typeof entity.autocompleter === "boolean" ? entity.autocompleter : (entity.data_volume_oom > 2));
 });
 
@@ -408,7 +407,7 @@ module.exports.define("renderDropdown", function (div, render_opts, css_class) {
 
 
 module.exports.define("autocompleter", function (match_term, out, session) {
-    var ref_entity = Data.Entity.getEntityThrowIfUnrecognized(this.ref_entity);
+    var ref_entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
     var query = ref_entity.getAutoCompleterQuery();
     var filter_condition = this.autocompleter_filter
            || this.selection_filter

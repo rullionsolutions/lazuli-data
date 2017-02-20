@@ -32,7 +32,7 @@ module.exports.override("clone", function (spec) {
     connection.connection_retries = 1;
 
     spec.tx_row = Data.Entity.getEntity("ac_tx").cloneAutoIncrement(spec, {
-//        start_point: (new Date()),
+        start_point: "now",
         user_id: spec.session.user_id,
         session_id: spec.session.getSessionId(),
         page: ((spec.page && spec.page.id) || ""),
@@ -60,6 +60,7 @@ module.exports.define("getMessageManager", function () {
         this.messages = Data.MessageManagerTrans.clone({
             id: this.id,
             trans: this,
+            instance: true,
         });
     }
     return this.messages;
@@ -151,23 +152,11 @@ module.exports.define("getRow", function (entity_id, key, addl_data) {
 * @param Entity id or undefined
 * @return Array of entities row or an empty array
 */
-module.exports.define("getExistingRows", function (entity_id) {
+module.exports.define("getExistingRows", function (select_entity_id) {
     var rows = [];
-    var that = this;
-
-    function pushRow(ignore, row) {
+    this.doFullKeyRows(function (row) {
         rows.push(row);
-    }
-    function pushAllRows(rows_entity_id) {
-        Object.keys(that.curr_rows[rows_entity_id]).forEach(pushRow);
-    }
-
-    if (entity_id && this.curr_rows[entity_id]) {
-        Object.keys(this.curr_rows[entity_id]).forEach(pushRow);
-    }
-    if (!entity_id) {
-        Object.keys(this.curr_rows).forEach(pushAllRows);
-    }
+    }, select_entity_id);
     rows.sort(function (row1, row2) {
         return row1.getKey() > row2.getKey() ? 1 : -1;
     });
@@ -188,12 +177,22 @@ module.exports.define("removeRow", function (row) {
 });
 
 
-module.exports.define("doFullKeyRows", function (funct) {
-    Object.keys(this.curr_row).forEach(function (ignore, curr_rows) {
-        Object.keys(curr_rows).forEach(function (ignore2, curr_row) {
-            funct(curr_row);
+module.exports.define("doFullKeyRows", function (funct, select_entity_id) {
+    var that = this;
+    function doRowsForEntity(rows_entity_id) {
+        if (that.curr_rows[rows_entity_id]) {
+            Object.keys(that.curr_rows[rows_entity_id]).forEach(function (key) {
+                funct(that.curr_rows[rows_entity_id][key]);
+            });
+        }
+    }
+    if (select_entity_id) {
+        doRowsForEntity(select_entity_id);
+    } else {
+        Object.keys(this.curr_rows).forEach(function (rows_entity_id) {
+            doRowsForEntity(rows_entity_id);
         });
-    });
+    }
 });
 
 
@@ -273,7 +272,7 @@ module.exports.define("isValid", function () {
             valid = valid && row.isValid();
         }
     });
-    valid = valid && !this.messages.error_recorded_since_clear;
+    valid = valid && !this.messages.error_recorded;
     return valid;
 //    return this.messages.isValid();
 });
@@ -293,6 +292,24 @@ module.exports.define("getStatus", function () {
         return "V";
     }
     return "N";
+});
+
+
+module.exports.define("update", function () {
+    if (!this.active) {
+        this.throwError("transaction not active");
+    }
+    if (this.presave_called) {
+        this.throwError("presave already called");
+    }
+    this.doPartialKeyRows(function (row) {
+        if (row.isModified()) {
+            row.update();
+        }
+    });
+    this.doFullKeyRows(function (row) {
+        row.update();
+    });
 });
 
 
@@ -414,7 +431,7 @@ module.exports.define("save", function (outcome_id) {
         this.active = false;
         this.connection.finishedWithConnection();
     }
-    this.performNextAutoSteps();
+    // this.performNextAutoSteps();
 });
 
 

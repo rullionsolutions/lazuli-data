@@ -84,21 +84,6 @@ module.exports.defbind("setupEntity", "cloneType", function () {
 });
 
 
-module.exports.defbind("eventShim", "clone", function () {
-    var that = this;
-    this.events = {
-        add: function (id, event, script) {
-            if (id === "presave") {
-                id = "presaveEvent";
-            } else if (id === "update") {
-                id = "updateEvent";
-            }
-            that.defbind(id, event, script);
-        },
-    };
-});
-
-
 module.exports.define("getRecord", function (spec) {
     spec = spec || {};
     spec.id = spec.id || this.id;
@@ -162,10 +147,10 @@ module.exports.define("getTransRow", function (trans, action, key, addl_data) {
 
 module.exports.define("getMessageManager", function () {
     if (!this.messages) {
-        this.messages = Data.MessageManagerField.clone({
+        this.messages = Data.MessageManagerRecord.clone({
             id: "row_" + this.row_number,
             record: this,
-            // prefix: (this.row_number === 0) ? "" : this.title,
+            instance: true,
         });
     }
     return this.messages;
@@ -345,7 +330,7 @@ module.exports.override("isValid", function () {
     // TODO - some code sets the key of sub-records in page presave(),
     // which is only called if the transaction is valid already
     return Data.FieldSet.isValid.call(this) && !this.duplicate_key /* && this.isKeyComplete()*/
-            && !this.lock_failure && (!this.messages || !this.messages.error_recorded_since_clear);
+            && !this.lock_failure && (!this.messages || !this.messages.error_recorded);
 });
 
 
@@ -370,6 +355,9 @@ module.exports.override("setDelete", function (bool) {
 
 module.exports.define("eachChildRow", function (callback) {
     var that = this;
+    if (!this.children) {
+        return;
+    }
     Object.keys(this.children).forEach(function (entity_id) {
         that.trace("loadChildRows() found child: " + entity_id);
         that.eachLinkedRow(entity_id, null, callback);
@@ -379,6 +367,7 @@ module.exports.define("eachChildRow", function (callback) {
 
 module.exports.define("eachLinkedRow", function (entity_id, link_field_id, callback) {
     var entity = this.getEntityThrowIfUnrecognized(entity_id);
+    var that = this;
     var query;
     var row;
     var response;
@@ -405,26 +394,25 @@ module.exports.define("eachLinkedRow", function (entity_id, link_field_id, callb
         }
     }
     query.reset();
-    if (!this.trans) {
+    if (!this.trans || !this.trans.curr_rows[entity_id]) {
         return;
     }
-
     Object.keys(this.trans.curr_rows[entity_id]).forEach(function (i) {
-        var row2 = this.trans.curr_rows[entity_id][i];
-        if (row2.action === "C" && row2.getField(link_field_id).get() === this.getKey()) {
-            callback.call(this, row2);
+        var row2 = that.trans.curr_rows[entity_id][i];
+        if (row2.action === "C" && row2.getField(link_field_id).get() === that.getKey()) {
+            callback.call(that, row2);
         }
     });
 });
 
-/*
+
 module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, callback,
         force_trans, override_scope) {
-    var query,
-        row,
-        record,
-        i,
-        scope;
+    var query;
+    var row;
+    var record;
+    var that = this;
+    var scope = override_scope || this;
 
     if (!link_field_id) {
         if (this.getEntity(entity_id).parent_entity === this.id) {
@@ -432,9 +420,12 @@ module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, call
         }
     }
 
-    scope = override_scope || this;
     query = this.getEntity(entity_id).getQuery();
-    query.addCondition( { column: "A." + link_field_id, operator: "=", value: this.getKey() });
+    query.addCondition({
+        column: "A." + link_field_id,
+        operator: "=",
+        value: this.getKey(),
+    });
     while (query.next()) {
         row = this.trans && this.trans.curr_rows[entity_id]
             && this.trans.curr_rows[entity_id][query.getColumn("A._key").get()];
@@ -445,7 +436,7 @@ module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, call
             callback.call(scope, row);
         } else {
             if (!record) {
-                record = this.getEntity(entity_id).getRecord({ modifiable: false });
+                record = this.getEntity(entity_id).getRecord({ modifiable: false, });
             }
             record.populate(query.resultset);
             callback.call(scope, record);
@@ -453,20 +444,18 @@ module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, call
     }
     query.reset();
 
-    if (!this.trans) {
+    if (!this.trans || !this.trans.curr_rows[entity_id]) {
         return;
     }
     // do new rows added to the transaction
-    for (i in this.trans.curr_rows[entity_id]) {
-        if (this.trans.curr_rows[entity_id].hasOwnProperty(i)) {
-            row = this.trans.curr_rows[entity_id][i];
-            if (row.action === 'C' && row.getField(link_field_id).get() === this.getKey()) {
-                callback.call(scope, row, null);
-            }
+    Object.keys(this.trans.curr_rows[entity_id]).forEach(function (key) {
+        row = that.trans.curr_rows[entity_id][key];
+        if (row.action === "C" && row.getField(link_field_id).get() === that.getKey()) {
+            callback.call(scope, row, null);
         }
-    }
+    });
 });
-*/
+
 
 module.exports.defbind("preventKeyChange", "beforeFieldChange", function (arg) {
     if (this.isKey(arg.field.getId()) && this.db_record_exists) {
@@ -526,6 +515,7 @@ module.exports.define("copyFromQuery", function (query) {
 
 // FieldSet.update() does something completely different and not wanted?
 module.exports.override("update", function () {
+/*
     var label = this.getLabel();
     if (this.messages && this.messages.prefix) {            // Only update prefix if it not blank
         this.messages.prefix = this.title;
@@ -533,6 +523,7 @@ module.exports.override("update", function () {
             this.messages.prefix += " " + label;
         }
     }
+*/
     if (this.messages && this.duplicate_key) {
         this.messages.add({
             type: "E",
@@ -683,7 +674,7 @@ module.exports.define("addTileURL", function (div_elem, render_opts) {
     //     div_elem.attr("url", display_page.getSimpleURL(this.getKey()));
     // }
     if (!this.tile_control_field) {
-        this.tile_control_field = this.field_types.get("Reference").clone({
+        this.tile_control_field = Data.Reference.clone({
             id: "_tile_control",
             label: "",
             ref_entity: this.id,

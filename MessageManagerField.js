@@ -25,7 +25,7 @@ module.exports.override("addJSON", function (container, tag, prefix) {
 
 
 module.exports.override("getPrefix", function () {
-    return this.field.label;
+    return this.field.label + ": ";
 });
 
 
@@ -34,8 +34,11 @@ module.exports.define("renderErrors", function (parent_elem, render_opts) {
     var delim_client = "";
     var text_server = "";
     var delim_server = "";
+    var i;
+    var msg;
 
-    Object.keys(this.messages).forEach(function (msg) {
+    for (i = 0; i < this.messages.length; i += 1) {
+        msg = this.messages[i];
         if (msg.cli_side_revalidate) {
             text_client += delim_client + msg.text;
             delim_client = "\n";
@@ -43,7 +46,7 @@ module.exports.define("renderErrors", function (parent_elem, render_opts) {
             text_server += delim_server + msg.text;
             delim_server = "\n";
         }
-    });
+    }
     if (text_client) {
         parent_elem.makeElement("span", "help-block css_client_messages").text(text_client);
         this.debug("Client-side Error text for field " + this.toString() + " = " + text_client);
