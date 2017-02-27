@@ -4,8 +4,6 @@ var Core = require("lapis-core/index.js");
 var SQL = require("lazuli-sql/index.js");
 var Data = require("lazuli-data/index.js");
 
-// var field_types = {};
-
 /**
 * To represent a basic unit of textual information, how it is captured, validated, stored
 *   in the database, and represented on screen
@@ -46,26 +44,6 @@ module.exports.register("beforeTransChange");
 module.exports.register("validate");
 module.exports.register("afterChange");
 module.exports.register("afterTransChange");
-
-
-// field_types.Text = module.exports;
-module.exports.fields = Core.Collection.clone({
-    id: "fields",
-    item_type: module.exports,
-});
-
-
-module.exports.define("registerFieldType", function (field) {
-    module.exports.fields.add(field);
-    // field_types[field.id] = field;
-});
-
-module.exports.registerFieldType(module.exports);
-
-module.exports.define("getFieldType", function (id) {
-    // return field_types[id];
-    return module.exports.fields.get(id);
-});
 
 
 /**
@@ -358,7 +336,7 @@ module.exports.define("getLoVInternal", function (spec) {
     spec.connection = this.owner && this.owner.connection;
     // include this.owner.connection - to use Transaction's connection if within a transaction
     if (spec.entity_id) {
-        entity = Data.Entity.getEntity(this.ref_entity);
+        entity = Data.entities.get(this.ref_entity);
         spec.condition = spec.condition || this.selection_filter || this.ref_condition
             || entity.selection_filter;
         if (spec.skip_full_load === undefined) {
@@ -536,7 +514,7 @@ module.exports.define("getText", function () {
 * @return [config_item][this.get()].title as a string, otherwise '[unknown]'
 */
 module.exports.define("getConfigItemText", function (config_item, val) {
-    var obj = Core.Base.getCollection(config_item);
+    var obj = Core.Collection.getCollection(config_item);
     var label_prop = this.label_prop || "title";
 
     if (typeof obj !== "object") {

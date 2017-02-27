@@ -1,13 +1,9 @@
 "use strict";
 
-var Core = require("lapis-core/index.js");
 var Data = require("lazuli-data/index.js");
 var SQL = require("lazuli-sql/index.js");
 var UI = require("lazuli-ui/index.js");
 var IO = require("lazuli-io/index.js");
-
-// to do
-// var entities = {};
 
 /**
 * To represent a record in a database table
@@ -34,52 +30,20 @@ module.exports.register("afterTransChange");
 module.exports.register("presave");
 
 
-module.exports.entities = Core.Collection.clone({
-    id: "entities",
-    item_type: module.exports,
-});
-
-
-// Temporary
-module.exports.define("getEntity", function (entity_id) {
-    // return entities.get(entity_id);
-    return module.exports.entities.get(entity_id);
-});
-
-
-module.exports.define("eachEntity", function (callback) {
-    // Object.keys(entities).forEach(function (entity_id) {
-    //     callback(entities[entity_id]);
-    // });
-    module.exports.entities.forOwn(callback);
-});
-
-
-module.exports.define("getEntityThrowIfUnrecognized", function (entity_id) {
-    return module.exports.entities.getThrowIfUnrecognized(entity_id);
-    // if (!entity) {
-    //     this.throwError("Entity not recognized: " + entity_id);
-    // }
-    // return entity;
-});
-
-
 module.exports.defbind("setupEntity", "cloneType", function () {
+    var parent_entity;
     this.table = this.table || this.id;
-    // if (!this.skip_registration) {
-        // entities[this.id] = this;
-        // module.exports.entities.add(this);
-    // }
+    if (!this.skip_registration) {
+        Data.entities.add(this);
+    }
     if (this.parent_entity) {            // parent_entity MUST be loaded first
         this.trace("Linking " + this.id + " to its parent " + this.parent_entity);
         // parent entities will have to be loaded before their children!
-        if (!this.getEntity(this.parent_entity)) {
-            this.throwError("invalid parent entity");
+        parent_entity = Data.entities.getThrowIfUnrecognized(this.parent_entity);
+        if (!parent_entity.children) {
+            parent_entity.children = {};
         }
-        if (!this.getEntity(this.parent_entity).children) {
-            this.getEntity(this.parent_entity).children = {};
-        }
-        this.getEntity(this.parent_entity).children[this.id] = this;
+        parent_entity.children[this.id] = this;
     }
 });
 
@@ -195,7 +159,7 @@ module.exports.define("getSearchPage", function () {
     if (typeof this.search_page === "string") {
         page_id = this.search_page;
     }
-    return UI.Page.getPage(page_id);        // can't declare at top due to circularity!!!!
+    return UI.pages.get(page_id);        // can't declare at top due to circularity!!!!
 });
 
 
@@ -204,7 +168,7 @@ module.exports.define("getDisplayPage", function () {
     if (typeof this.display_page === "string") {        // ignores this.display_page if boolean
         page_id = this.display_page;
     }
-    return UI.Page.getPage(page_id);
+    return UI.pages.get(page_id);
 });
 
 
@@ -366,7 +330,7 @@ module.exports.define("eachChildRow", function (callback) {
 
 
 module.exports.define("eachLinkedRow", function (entity_id, link_field_id, callback) {
-    var entity = this.getEntityThrowIfUnrecognized(entity_id);
+    var entity = Data.entities.getThrowIfUnrecognized(entity_id);
     var that = this;
     var query;
     var row;
@@ -408,6 +372,7 @@ module.exports.define("eachLinkedRow", function (entity_id, link_field_id, callb
 
 module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, callback,
         force_trans, override_scope) {
+    var entity = Data.entities.getThrowIfUnrecognized(entity_id);
     var query;
     var row;
     var record;
@@ -415,12 +380,12 @@ module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, call
     var scope = override_scope || this;
 
     if (!link_field_id) {
-        if (this.getEntity(entity_id).parent_entity === this.id) {
-            link_field_id = this.getEntity(entity_id).link_field;
+        if (entity.parent_entity === this.id) {
+            link_field_id = entity.link_field;
         }
     }
 
-    query = this.getEntity(entity_id).getQuery();
+    query = entity.getQuery();
     query.addCondition({
         column: "A." + link_field_id,
         operator: "=",
@@ -436,7 +401,7 @@ module.exports.define("eachLinkedRow2", function (entity_id, link_field_id, call
             callback.call(scope, row);
         } else {
             if (!record) {
-                record = this.getEntity(entity_id).getRecord({ modifiable: false, });
+                record = entity.getRecord({ modifiable: false, });
             }
             record.populate(query.resultset);
             callback.call(scope, record);
@@ -765,7 +730,7 @@ module.exports.define("getUnisrchQuery", function (session, query_str, columns) 
     query.main.addColumn(columns.key);
     query.main.addColumn(columns.match);
     query.addCondition({
-        type: SQL.Connection.types.having_cond,
+        type: SQL.Query.Condition.types.having_cond,
         full_condition: columns.match.name + " LIKE " + query_str + " OR " + columns.key.name + " LIKE " + query_str,
     });
     if (typeof page_entity.addSecurityCondition === "function") {

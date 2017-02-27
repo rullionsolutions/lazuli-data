@@ -41,7 +41,7 @@ module.exports = Data.Text.clone({
 
 /*
 Rhino.App.defbind("statefulDailyRetest", "dailyBatch", function (session) {
-    Data.Entity.eachEntity(function (entity_id, entity) {
+    Data.entities.each(function (entity_id, entity) {
         entity.each(function (field) {
             if (field.type === "WorkflowState") {
                 field.dailyRetest(session);
@@ -124,7 +124,7 @@ module.exports.define("setupWorkflow", function () {
 
     // needed only while we use ac_wf_inst and ac_wf_inst_node - for backward compatibility
     this.wf_tmpl_id = "swf_" + this.id;         // 25 char limit
-    Data.Entity.getEntity("ac_wf_inst").templates[this.wf_tmpl_id] = Data.Entity.getEntity("ac_wf_inst");
+    Data.entities.get("ac_wf_inst").templates[this.wf_tmpl_id] = Data.entities.get("ac_wf_inst");
     if (templates[this.wf_tmpl_id]) {
         this.throwError("swf field id already used: " + this.wf_tmpl_id);
     }
@@ -395,7 +395,7 @@ module.exports.define("forEachActiveNode", function (callback) {
     var query;
     if (!this.active_nodes) {
         this.active_nodes = [];
-        query = Data.Entity.getEntity("ac_wf_inst_node").getQuery();
+        query = Data.entities.get("ac_wf_inst_node").getQuery();
         query.addCondition({
             column: "A.wf_inst",
             operator: "=",
@@ -510,7 +510,7 @@ module.exports.define("createNewWorkflow", function () {
 
 
 module.exports.define("createNewNode", function (wf_state, transition) {
-    var page = UI.Page.getPage(transition.page_id);
+    var page = UI.pages.get(transition.page_id);
 /*
     var node_row = this.owner.trans.createNewRow("swf_inst_node");
     this.debug("createNewNode(): " + JSON.stringify(transition));
@@ -566,7 +566,7 @@ module.exports.define("createNewNode", function (wf_state, transition) {
 module.exports.define("getWfInstRow", function () {
     var query;
     if (!this.wf_inst_row) {
-        query = Data.Entity.getEntity("ac_wf_inst").getQuery();
+        query = Data.entities.get("ac_wf_inst").getQuery();
         query.addCondition({
             column: "A.wf_tmpl",
             operator: "=",
@@ -581,7 +581,7 @@ module.exports.define("getWfInstRow", function () {
             if (this.owner.trans) {
                 this.wf_inst_row = query.getRow(this.owner.trans);
             } else {
-                this.wf_inst_row = Data.Entity.getEntity("ac_wf_inst").getRow(query.getColumn("A._key").get());
+                this.wf_inst_row = Data.entities.get("ac_wf_inst").getRow(query.getColumn("A._key").get());
             }
         }
         query.reset();
@@ -673,7 +673,7 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     try {
         wf_inst_id = this.getWfInstRow().getKey();
         ul_elem.addChild("li").addChild("a")
-            .attr("href", UI.Page.getPage("ac_swf_inst_display").getSimpleURL(wf_inst_id))
+            .attr("href", UI.pages.get("ac_swf_inst_display").getSimpleURL(wf_inst_id))
             .text("Show Instance");
         count += 1;
     } catch (e1) {
@@ -681,7 +681,7 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     }
     try {
         ul_elem.addChild("li").addChild("a")
-            .attr("href", UI.Page.getPage("ac_swf_tmpl_display").getSimpleURL() + "&wf_tmpl_id=" + this.wf_tmpl_id)
+            .attr("href", UI.pages.get("ac_swf_tmpl_display").getSimpleURL() + "&wf_tmpl_id=" + this.wf_tmpl_id)
             .text("Show Template");
         count += 1;
     } catch (e2) {
@@ -738,7 +738,7 @@ module.exports.define("getTemplateAutoTransitionDotGraph", function (from_state_
 
 module.exports.define("getTemplatePageTransitionDotGraph", function (from_state_id, transition) {
     var out = "";
-    var page = UI.Page.getPage(transition.page_id);
+    var page = UI.pages.get(transition.page_id);
     function addTransition(to_state_id, title_addl) {
         out += from_state_id + " -> " + to_state_id +
             " [ label=\"" + (page.short_title || page.title) + title_addl + "\"";

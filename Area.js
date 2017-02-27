@@ -1,10 +1,8 @@
 "use strict";
 
 var Core = require("lapis-core/index.js");
+var Data = require("lazuli-data/index.js");
 var IO = require("lazuli-io/index.js");
-
-// to do
-// var areas = {};
 
 /**
 * To represent a functional area of the system
@@ -19,33 +17,8 @@ module.exports = Core.Base.clone({
 module.exports.defbind("setupTextStrings", "clone", function () {
     this.text_strings = {};
     // areas[this.id] = this;
-    // module.exports.areas.add(this);
-});
-
-
-module.exports.areas = Core.Collection.clone({
-    id: "areas",
-    item_type: module.exports,
-});
-
-
-module.exports.define("getArea", function (area_id) {
-    // return areas[area_id];
-    return module.exports.areas.getThrowIfUnrecognized(area_id);
-});
-
-
-module.exports.define("eachArea", function (callback) {
-    // Object.keys(areas).forEach(function (area_id) {
-    //     callback(areas[area_id]);
-    // });
-    module.exports.areas.forOwn(callback);
-});
-
-
-module.exports.define("setModule", function (module) {
+    Data.areas.add(this);
     this.path = IO.File.getDirectory("../" + module.id);
-    this.info("Area.setModule(): " + this.path);
 });
 
 

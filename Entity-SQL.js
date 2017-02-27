@@ -338,7 +338,7 @@ module.exports.define("getNewKeyValue", function (auto_generate_field, where_cla
         where_clause = "";
     }
     if (this.using_max_key_table) {
-        new_max = this.getEntity("ac_max_key").generate(this.table, where_clause, this.rest_of_key,
+        new_max = Data.entities.get("ac_max_key").generate(this.table, where_clause, this.rest_of_key,
             auto_generate_field.id, this.trans ? this.trans.id : "NULL", this.trans ? this.trans.session : null);
     } else {
         try {

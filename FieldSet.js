@@ -34,11 +34,8 @@ module.exports.define("addField", function (field_spec) {
     if (!field_spec.type) {
         this.throwError("field type must be specified");
     }
-    if (!field_spec.type || !Data.Text.getFieldType(field_spec.type)) {
-        this.throwError("field type does not exist: " + field_spec.type);
-    }
     field_spec.instance = this.instance;
-    field = Data.Text.getFieldType(field_spec.type).clone(field_spec);
+    field = Data.fields.getThrowIfUnrecognized(field_spec.type).clone(field_spec);
     this.add(field);
     if (this.page) {
         field.addToPage(this.page);

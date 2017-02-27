@@ -180,7 +180,7 @@ module.exports.define("loadEntityInternal", function (condition, sort, active) {
     var last_item = null;
 
     if (!this.record) {
-        this.record = Data.Entity.getEntityThrowIfUnrecognized(this.entity_id).getRecord({
+        this.record = Data.entities.getThrowIfUnrecognized(this.entity_id).getRecord({
             connection: this.connection,
         });
     }
@@ -210,7 +210,7 @@ module.exports.define("loadEntityInternal", function (condition, sort, active) {
 
 module.exports.define("loadCollection", function () {
     var that = this;
-    this.getCollection(this.collection_id).each(function (source_item) {
+    Data.Collection.getCollection(this.collection_id).each(function (source_item) {
         that.addItem(source_item.id, source_item[that.label_prop],
             !that.active_prop || source_item[that.active_prop]);
     });

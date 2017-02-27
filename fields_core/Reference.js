@@ -40,13 +40,13 @@ module.exports.override("addToPage", function (page) {
 
 
 module.exports.override("getKeyPieces", function () {
-    return Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity).getKeyPieces();
+    return Data.entities.getThrowIfUnrecognized(this.ref_entity).getKeyPieces();
 });
 
 
 module.exports.override("getDataLength", function () {
     if (typeof this.data_length !== "number") {
-        this.data_length = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity)
+        this.data_length = Data.entities.getThrowIfUnrecognized(this.ref_entity)
             .getKeyLength();
     }
     return this.data_length;
@@ -54,7 +54,7 @@ module.exports.override("getDataLength", function () {
 
 
 module.exports.override("getDBTextExpr", function (alias) {
-    var ref_entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
+    var ref_entity = Data.entities.getThrowIfUnrecognized(this.ref_entity);
     return "(SELECT " + ref_entity.getPatternConcatExpr("ZR") + " FROM " + ref_entity.table + " ZR WHERE ZR._key = " +
         (alias ? alias + (this.sql_function ? "_" : ".") : "") + this.id + ")";
 });
@@ -80,12 +80,12 @@ module.exports.define("getLoV", function () {
         if (!this.ref_entity) {
             this.throwError("no ref entity property");
         }
-        if (!Data.Entity.getEntity(this.ref_entity)) {
+        if (!Data.entities.get(this.ref_entity)) {
             this.throwError("unrecognized ref entity");
         }
         // this.ref_condition is deprecated in favour of this.selection_filter
         condition = this.selection_filter || this.ref_condition ||
-            Data.Entity.getEntity(this.ref_entity).selection_filter;
+            Data.entities.get(this.ref_entity).selection_filter;
         this.lov = LoV.getEntityLoV(this.ref_entity, condition);
     }
     return this.lov;
@@ -115,7 +115,7 @@ module.exports.define("getRow", function () {
                 this.owner.trans.isInCache(this.ref_entity, ref_val))) {
             return this.owner.trans.getActiveRow(this.ref_entity, ref_val);
         }
-        return Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity).getRow(ref_val);
+        return Data.entities.getThrowIfUnrecognized(this.ref_entity).getRow(ref_val);
     }
     return null;
 });
@@ -132,7 +132,7 @@ module.exports.defbind("validateReference", "validate", function () {
         });
         return;
     }
-    if (!Data.Entity.entities.get(this.ref_entity)) {
+    if (!Data.entities.get(this.ref_entity)) {
         this.messages.add({
             type: "E",
             text: "ref_entity property value invalid: " + this.ref_entity,
@@ -183,7 +183,7 @@ module.exports.override("getTextFromVal", function () {
 
 
 module.exports.override("getURLFromVal", function () {
-    var display_page = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity)
+    var display_page = Data.entities.getThrowIfUnrecognized(this.ref_entity)
             .getDisplayPage();
     var url = "";
     var this_val = this.getRefVal();
@@ -309,19 +309,19 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     var display_url;
     var context_url;
 
-    if (!this_val || !this.ref_entity || !Data.Entity.entities.get(this.ref_entity)) {
+    if (!this_val || !this.ref_entity || !Data.entities.get(this.ref_entity)) {
         return null;
     }
-    display_page = Data.Entity.entities.get(this.ref_entity).getDisplayPage();
+    display_page = Data.entities.get(this.ref_entity).getDisplayPage();
     if (!display_page) {
         return null;
     }
     if (!cached_record) {
-        cached_record = Data.Entity.entities.get(this.ref_entity).getSecurityRecord(session, this_val);
+        cached_record = Data.entities.get(this.ref_entity).getSecurityRecord(session, this_val);
     }
-    if (UI.Page.getPage(this.ref_entity + "_context") && UI.Page.getPage(this.ref_entity + "_context").allowed(session, this_val, cached_record).access) {
+    if (UI.pages.get(this.ref_entity + "_context") && UI.pages.get(this.ref_entity + "_context").allowed(session, this_val, cached_record).access) {
 //        context_url = "modal&page_id=" + this.ref_entity + "_context&page_key=" + this_val;
-        context_url = UI.Page.getPage(this.ref_entity + "_context").getSimpleURL(this_val);
+        context_url = UI.pages.get(this.ref_entity + "_context").getSimpleURL(this_val);
     }
     if (display_page.allowed(session, this_val, cached_record).access) {
         display_url = display_page.getSimpleURL(this_val);
@@ -361,7 +361,7 @@ module.exports.define("isAutocompleter", function () {
     if (typeof this.render_autocompleter === "boolean") {
         return this.render_autocompleter;
     }
-    entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
+    entity = Data.entities.getThrowIfUnrecognized(this.ref_entity);
     return (typeof entity.autocompleter === "boolean" ? entity.autocompleter : (entity.data_volume_oom > 2));
 });
 
@@ -407,7 +407,7 @@ module.exports.define("renderDropdown", function (div, render_opts, css_class) {
 
 
 module.exports.define("autocompleter", function (match_term, out, session) {
-    var ref_entity = Data.Entity.entities.getThrowIfUnrecognized(this.ref_entity);
+    var ref_entity = Data.entities.getThrowIfUnrecognized(this.ref_entity);
     var query = ref_entity.getAutoCompleterQuery();
     var filter_condition = this.autocompleter_filter
            || this.selection_filter
@@ -460,17 +460,17 @@ module.exports.override("addColumnToTable", function (query_table, col_spec) {
     var column;
     var sort_cols;
 
-    if (!this.ref_entity || !Data.Entity.getEntity(this.ref_entity)) {
+    if (!this.ref_entity || !Data.entities.get(this.ref_entity)) {
         this.throwError("invalid ref entity");
     }
     column = Data.Text.addColumnToTable.call(this, query_table, col_spec);
-    if (Data.Entity.getEntity(this.ref_entity).reference_sort_order) {
-        column.order_term = Data.Entity.getEntity(this.ref_entity).reference_sort_order;
+    if (Data.entities.get(this.ref_entity).reference_sort_order) {
+        column.order_term = Data.entities.get(this.ref_entity).reference_sort_order;
     } else {
-        if (!Data.Entity.getEntity(this.ref_entity).default_order) {
+        if (!Data.entities.get(this.ref_entity).default_order) {
             this.throwError("undefined property");
         }
-        sort_cols = Data.Entity.getEntity(this.ref_entity).default_order.split(/\s*,\s*/);
+        sort_cols = Data.entities.get(this.ref_entity).default_order.split(/\s*,\s*/);
         column.order_term = sort_cols[0];
     }
     column.order_term = "( SELECT ZR." + column.order_term + " FROM " + this.ref_entity + " ZR WHERE ZR._key=" +
@@ -495,7 +495,7 @@ module.exports.define("checkDataIntegrity", function () {
     var delim = "";
 
 
-    if (!this.ref_entity || Data.Entity.getEntity(this.ref_entity).view_only
+    if (!this.ref_entity || Data.entities.get(this.ref_entity).view_only
             || this.sql_function || !this.owner) {
         return null;
     }

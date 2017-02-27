@@ -23,7 +23,6 @@ module.exports.override("clone", function (spec) {
     if (typeof spec.session !== "object") {
         this.throwError("requires session");
     }
-    // spec.id = String(Entity.getEntity("ac_max_key").generate("ac_tx", null, null, "id", null));
     // moved up to here to open connection now, so that connection.conn.getId() works
     // specifically AVOID putting connection into spec, so that tx_row doesn't use it...
     connection = SQL.Connection.getTransConnection("Trans_" + spec.session.getSessionId());
@@ -31,7 +30,7 @@ module.exports.override("clone", function (spec) {
     // prevent re-creating a dropped connection during transaction
     connection.connection_retries = 1;
 
-    spec.tx_row = Data.Entity.getEntity("ac_tx").cloneAutoIncrement(spec, {
+    spec.tx_row = Data.entities.get("ac_tx").cloneAutoIncrement(spec, {
         start_point: "now",
         user_id: spec.session.user_id,
         session_id: spec.session.getSessionId(),
@@ -77,7 +76,7 @@ module.exports.define("createNewRow", function (entity_id, addl_data) {
     if (!this.active) {
         this.throwError("transaction not active");
     }
-    row = Data.Entity.getEntity(entity_id).getTransRow(this, "C", null, addl_data);
+    row = Data.entities.get(entity_id).getTransRow(this, "C", null, addl_data);
     this.new_rows.push(row);            // add to new_rows cache before generating key
     row.setDefaultVals();
     row.generateKey();                  // which may move it into the curr_rows cache
@@ -104,7 +103,7 @@ module.exports.define("getActiveRow", function (entity_id, key) {
     if (row) {
         return row;
     }
-    row = Data.Entity.getEntity(entity_id).getTransRow(this, "U", key);
+    row = Data.entities.get(entity_id).getTransRow(this, "U", key);
     row.load(key);                    // throws 'Record not found' if not found
     this.addToCache(row);
     row.happen("initUpdate");
@@ -124,7 +123,7 @@ module.exports.define("getRow", function (entity_id, key, addl_data) {
     if (row) {
         return row;
     }
-    row = Data.Entity.getEntity(entity_id).getTransRow(this, "", key, addl_data);
+    row = Data.entities.get(entity_id).getTransRow(this, "", key, addl_data);
     try {
         row.load(key);                // throws 'Record not found' if not found
         // added to Entity.keyChange() to happen automatically whenever a key field is changed
