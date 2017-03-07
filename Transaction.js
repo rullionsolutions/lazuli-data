@@ -36,7 +36,8 @@ module.exports.override("clone", function (spec) {
         session_id: spec.session.getSessionId(),
         page: ((spec.page && spec.page.id) || ""),
         tx_stat: "P",
-        mysql_conn_id: connection.getConnectionID(),
+        // getId doesn't exist in pooled connection
+        mysql_conn_id: ((connection.conn.getId && connection.conn.getId()) || ""),
     });
     spec.id = spec.tx_row.getKey();
 
