@@ -13,6 +13,7 @@ module.exports = Data.Number.clone({
     css_align: "center",
     placeholder: "HH:MM",
     input_mask: "99:99",
+    data_length: 10,
 // isn't working properly on client-side
 //    regex_pattern         : "([0-1][0-9]|2[0-3]):([0-5][0-9])",
     regex_label: "Not a valid time",

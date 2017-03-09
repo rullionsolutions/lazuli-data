@@ -2,9 +2,19 @@
 
 var Data = require("lazuli-data/index.js");
 
+/*
+module.exports = Data.Composite.clone({
+    id: "DateTime",
+    part_fields: [
+        Data.Date,
+        Data.Time,
+    ],
+});
+*/
+
 /**
 * To represent a date/time field
-*/
+**/
 module.exports = Data.Date.clone({
     id: "DateTime",
     css_type: "datetime",
@@ -39,6 +49,7 @@ module.exports.defbind("setFormatsMasks", "cloneInstance", function () {
     this.trace("setFormatsMasks(): " + this.internal_format_parts + ", " + this.update_format_parts);
 });
 
+/*
 module.exports.override("isBefore", function (date) {
     var nThisSecond = Math.floor(Date.parse(this.get()).getTime() / 1000);
     var nOtherSecond = Math.floor(Date.parse(this.parse(date)).getTime() / 1000);
@@ -54,16 +65,16 @@ module.exports.override("isAfter", function (date) {
 
 
 module.exports.override("beforeSet", function (val) {
-    if (typeof val === "string") {
-        if (val === "|") {
-            val = "";            // this is blank value
-        } else {
-            val = val.replace("|", " ");
-        }
+    this.debug("beforeSet() start: " + val);
+    if (!val || val === "|") {
+        val = "";
+    } else if (typeof val === "string") {
+        val = val.replace("|", " ");
     }
+    this.debug("beforeSet() end: " + val);
     return Data.Date.beforeSet.call(this, val);
 });
-
+*/
 
 module.exports.override("appendClientSideProperties", function (obj) {
     Data.Date.appendClientSideProperties.call(this, obj);
@@ -91,9 +102,14 @@ module.exports.define("getDatePart", function () {
 // });
 
 module.exports.define("getDatePartUpdate", function () {
-    return this.parse(this.getDatePart(), this.internal_format_parts[0],
-        this.update_format_parts[0]);
+    var date_part = this.getDatePart();
+    if (date_part) {
+        date_part = this.parse(date_part, this.internal_format_parts[0],
+            this.update_format_parts[0]);
+    }
+    return date_part;
 });
+
 
 module.exports.define("getTimePart", function () {
     var val_split = [];
@@ -114,9 +130,14 @@ module.exports.define("getTimePart", function () {
 // });
 
 module.exports.define("getTimePartUpdate", function () {
-    return this.parse(this.getTimePart(), this.internal_format_parts[1],
-        this.update_format_parts[1]);
+    var time_part = this.getTimePart();
+    if (time_part) {
+        time_part = this.parse(time_part, this.internal_format_parts[1],
+            this.update_format_parts[1]);
+    }
+    return time_part;
 });
+
 
 module.exports.override("renderUpdateControls", function (div) {
     div.makeInput("text", null, this.getDatePartUpdate(), "css_date_part input-mini", this.update_format_parts[0]);

@@ -110,3 +110,54 @@ module.exports.define("getDDL", function (delta) {
     }
     return out;
 });
+
+
+module.exports.define("findKeyMergeUpdates", function (from_val, to_val, chg_array) {
+    var sql = "SELECT A._key";
+    var resultset;
+    var start_index = chg_array.length;
+    var end_index;
+    var i;
+
+    if (this.isKey()) {
+        sql += ", (SELECT B._key FROM " + this.owner.table + " B WHERE B._key = REPLACE(REPLACE(A._key, '." +
+            from_val + "', '." + to_val + "'), '" + from_val + ".', '" + to_val + ".')) AS dup";
+    }
+    sql += " FROM " + this.owner.table + " A WHERE A." + this.id + " = " + SQL.Connection.escape(from_val);
+    resultset = SQL.Connection.shared.executeQuery(sql);
+    while (resultset.next()) {
+        this.debug("findKeyMergeUpdates() adding item " + SQL.Connection.getColumnString(resultset, 1));
+        chg_array.push({
+            entity_id: this.owner.id,
+            entity_title: this.owner.title,
+            key_string: SQL.Connection.getColumnString(resultset, 1),
+            field_id: this.id,
+            field_label: this.label,
+            from_val: from_val,
+            to_val: to_val,
+            dup: (this.isKey() && !!SQL.Connection.getColumnString(resultset, 2)),
+        });
+    }
+    SQL.Connection.shared.finishedWithResultSet(resultset);
+    end_index = chg_array.length;
+    if (this.isKey()) {
+        for (i = start_index; i < end_index; i += 1) {
+            chg_array[i].new_key = chg_array[i].key_string
+                .replace("." + from_val, "." + to_val)
+                .replace(from_val + ".", to_val + ".");
+            this.debug("findKeyMergeUpdates() recursing " +
+                chg_array[i].key_string + " -> " + chg_array[i].new_key);
+            this.owner.findKeyMergeUpdates(chg_array[i].key_string,
+                chg_array[i].new_key, chg_array);
+        }
+    }
+});
+
+
+module.exports.define("setAllowingExistingRecordKeyChange", function (new_val) {
+    if (this.isKey()) {
+        this.owner.db_record_exists = false;    // override to allow update to key field
+        this.fixed_key = false;         // override to allow update to key fields!
+    }
+    return this.set(new_val);
+});

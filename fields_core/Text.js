@@ -227,7 +227,7 @@ module.exports.define("setFromParams", function (params) {
     if (typeof params[control] === "string") {
         if (this.isEditable()) {
             this.trace("updateFields(): updating field " + control + " to value: " + params[control]);
-            this.set(params[control]);
+            this.setFromParamValue(params[control]);
         } else {
             this.warn("updateFields(): Can't update uneditable field " + control + " to value: " + params[control]);
         }
@@ -239,6 +239,11 @@ module.exports.define("setFromParams", function (params) {
     } else {
         this.throwError("param not string");
     }
+});
+
+
+module.exports.define("setFromParamValue", function (str) {
+    this.set(str);
 });
 
 

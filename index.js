@@ -44,8 +44,8 @@ exports.fields = Core.Collection.clone({
 exports.fields.add(exports.Text);
 exports.fields.add(exports.Attributes = require("lazuli-data/fields_core/Attributes.js"));
 exports.fields.add(exports.Boolean = require("lazuli-data/fields_core/Boolean.js"));
+exports.fields.add(exports.Composite = require("lazuli-data/fields_core/Composite.js"));
 exports.fields.add(exports.Date = require("lazuli-data/fields_core/Date.js"));
-exports.fields.add(exports.DateTime = require("lazuli-data/fields_core/DateTime.js"));
 exports.fields.add(exports.Email = require("lazuli-data/fields_core/Email.js"));
 exports.fields.add(exports.InternalLink = require("lazuli-data/fields_core/InternalLink.js"));
 exports.fields.add(exports.Number = require("lazuli-data/fields_core/Number.js"));
@@ -69,3 +69,5 @@ exports.fields.add(exports.Flex = require("lazuli-data/fields_supl/Flex.js"));
 exports.fields.add(exports.LoVCounter = require("lazuli-data/fields_supl/LoVCounter.js"));
 exports.fields.add(exports.NINumber = require("lazuli-data/fields_supl/NINumber.js"));
 exports.fields.add(exports.Time = require("lazuli-data/fields_supl/Time.js"));
+
+exports.fields.add(exports.DateTime = require("lazuli-data/fields_core/DateTime.js"));

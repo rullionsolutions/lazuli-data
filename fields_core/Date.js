@@ -86,10 +86,7 @@ module.exports.define("parseDisplay", function (val) {
 *   do NOT update the value of the field
 */
 module.exports.define("getDate", function () {
-    if (!this.isBlank()) {
-        return Date.parse(this.get());
-    }
-    return null;
+    return this.internal_date;
 });
 
 
@@ -99,14 +96,13 @@ module.exports.define("getDate", function () {
 * @return True if this field's value represents a point in time before the date argument
 */
 module.exports.define("isBefore", function (date) {
-    var nThisDay;
-    var nOtherDay;
-    if (!this.get() || !date) {
+    if (typeof date === "string") {
+        date = Core.Format.parseDateExpressionToDate(date);
+    }
+    if (!this.internal_date || !date) {
         return false;
     }
-    nThisDay = Math.floor(Date.parse(this.get()).getTime() / (1000 * 60 * 60 * 24));
-    nOtherDay = Math.floor(Date.parse(this.parse(date)).getTime() / (1000 * 60 * 60 * 24));
-    return (nThisDay < nOtherDay);
+    return this.internal_date.isBefore(date);
 });
 
 
@@ -116,31 +112,45 @@ module.exports.define("isBefore", function (date) {
 * @return True if this field's value represents a point in time after the date argument
 */
 module.exports.define("isAfter", function (date) {
-    var nThisDay;
-    var nOtherDay;
-    if (!this.get() || !date) {
+    if (typeof date === "string") {
+        date = Core.Format.parseDateExpressionToDate(date);
+    }
+    if (!this.internal_date || !date) {
         return false;
     }
-    nThisDay = Math.floor(Date.parse(this.get()).getTime() / (1000 * 60 * 60 * 24));
-    nOtherDay = Math.floor(Date.parse(this.parse(date)).getTime() / (1000 * 60 * 60 * 24));
-    return (nThisDay > nOtherDay);
+    return this.internal_date.isAfter(date);
 });
 
 
 module.exports.define("beforeSet", function (val) {
-    if (!val) {
+    this.trace("beforeSet() start: " + val);
+    if (!val || val === "|") {
         val = "";
     } else if (typeof val === "object" && typeof val.getFullYear === "function") {
         val = val.format(this.internal_format);
     } else if (typeof val === "string") {
-        val = this.parse(val);
-        if (!Date.isValid(val, this.internal_format)
-                && Date.isValid(val, this.update_format)) {
-            val = Date.parseString(val, this.update_format).format(this.internal_format);
+        try {
+            val = Core.Format.parseDateExpression(val, this.internal_format,
+                this.internal_format);
+        } catch (e) {
+            this.debug(e);
         }
     }
+    this.trace("beforeSet() end: " + val);
     return val;
 });
+
+
+module.exports.override("setFromParamValue", function (str) {
+    try {
+        str = str.replace(/\|/g, " ");
+        str = Core.Format.parseDateExpression(str, this.update_format, this.internal_format);
+    } catch (e) {
+        this.debug(e);
+    }
+    this.set(str);
+});
+
 
 module.exports.override("setInitial", function (new_val) {
     Data.Text.setInitial.call(this, this.beforeSet(new_val));
@@ -148,15 +158,24 @@ module.exports.override("setInitial", function (new_val) {
 
 
 module.exports.override("set", function (new_val) {
-    Data.Text.set.call(this, this.beforeSet(new_val));
+    return Data.Text.set.call(this, this.beforeSet(new_val));
+});
+
+
+module.exports.defbind("setInternalDate", "afterChange", function () {
+    this.internal_date = Date.parseString(this.get(), this.internal_format);
+    this.trace("setInternalDate(): " + this.internal_date);
+});
+
+
+module.exports.defbind("setInitialInternalDate", "setInitial", function () {
+    this.setInternalDate();
 });
 
 
 module.exports.defbind("validateDate", "validate", function () {
-    var date;
     if (this.val) {                // Only do special validation if non-blank
-        date = Date.parse(this.val);
-        if (date && date.format(this.internal_format) === this.val) {
+        if (this.internal_date) {
             if (this.min && this.val < this.parse(this.min)) {
                 this.messages.add({
                     type: "E",
@@ -180,15 +199,10 @@ module.exports.defbind("validateDate", "validate", function () {
 
 
 module.exports.override("getTextFromVal", function () {
-    var val = this.get();
-    if (val) {
-        try {
-            val = Date.parse(val).format(this.display_format);
-        } catch (ignore) {
-            this.trace(ignore);
-        }          // leave val as-is if date is invalid
+    if (this.internal_date) {
+        return this.internal_date.format(this.display_format);
     }
-    return val;
+    return this.get();
 });
 
 
