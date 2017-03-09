@@ -9,13 +9,13 @@ module.exports = Core.MessageManager.clone({
 
 
 module.exports.override("getPrefix", function () {
-    return (this.record.row_number === 0) ? "" : this.record.title;
+    return (this.record.row_number === 0) ? "" : this.record.getLabel();
 });
 
 
 module.exports.override("chain", function (funct) {
     var that = this;
-    if (this.record.trans.messages.include_field_messages === false) {
+    if (this.record.trans && this.record.trans.messages.include_field_messages === false) {
         return;
     }
     this.record.each(function (field) {

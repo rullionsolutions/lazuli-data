@@ -167,6 +167,7 @@ module.exports.define("reload", function (key) {
         this.db_record_exists = resultset.next();
         if (this.db_record_exists) {
             this.key = key;
+            this.db_record_key = key;
             this.populate(resultset);
             if (this.transactional) {
                 this.curr_tx = SQL.Connection.getColumnString(resultset, "A._tx");
@@ -192,6 +193,7 @@ module.exports.define("lock", function () {
     var sql;
     var primary_key_col = this.getAutoIncrementColumn() || "_key";
     var resultset;
+    var lock_failure = false;
 
     if (this.db_record_locked) {
         this.throwError("record already locked: " + this.title + " " + this.key);
@@ -199,7 +201,8 @@ module.exports.define("lock", function () {
     if (!this.db_record_exists) {
         this.throwError("record doesn't exist: " + this.title + " " + this.key);
     }
-    sql = "SELECT " + (this.transactional ? "_tx" : "1") + " FROM " + this.table + " WHERE " + primary_key_col + " = " + SQL.Connection.escape(this.key) + " FOR UPDATE";
+    sql = "SELECT " + (this.transactional ? "_tx" : "1") + " FROM " + this.table
+        + " WHERE " + primary_key_col + " = " + SQL.Connection.escape(this.db_record_key) + " FOR UPDATE";
 
     try {
         resultset = conn.executeQuery(sql);
@@ -207,25 +210,22 @@ module.exports.define("lock", function () {
                 || this.curr_tx === SQL.Connection.getColumnString(resultset, 1))) {
             this.db_record_locked = true;
         } else {
-            this.lock_failure = true;
-            this.messages.add({
-                type: "E",
-                fixed: true,
-                text: "record has been updated by another user, please cancel and try again",
-            });
+            lock_failure = true;
         }
     } catch (e) {
         this.report(e);
         if (e.lock_wait_timeout) {
-            this.lock_failure = true;
-            this.messages.add({
-                type: "E",
-                fixed: true,
-                text: "record being updated by another user, please try later",
-            });
+            lock_failure = true;
         }
     } finally {
         this.finishedWith(conn, resultset);
+    }
+    if (lock_failure) {
+        this.lock_failure_message = this.getMessageManager().add({
+            type: "E",
+            fixed: true,
+            text: "record has been updated by another user, please cancel and try again",
+        });
     }
 });
 
@@ -366,6 +366,7 @@ module.exports.define("insertAutoIncrement", function () {
         conn.executeUpdate(this.getInsertStatement());
         this.db_record_exists = true;
         this.getField(auto_incr_col).setInitial(conn.getAutoIncrement());
+        this.db_record_key = this.getField(auto_incr_col).get();
         if (this.trans) {
             this.trans.addToCache(this);
         }
@@ -401,6 +402,7 @@ module.exports.define("keyChange", function (field, old_val) {
     var i;
     var resultset;
     var result;
+    var duplicate_key = false;
 
     if (this.db_record_exists) {
         this.throwError("key change after record saved");        // Should never happen!
@@ -421,7 +423,6 @@ module.exports.define("keyChange", function (field, old_val) {
     }
 
     this.debug("key now complete: " + temp_key + " for Entity: " + this.id);
-    this.duplicate_key = false;     // Assume good new key to begin with
     conn = this.getConnection("keyChange");
     try {
         if (this.trans && this.trans.isInCache(this.id, temp_key)) {
@@ -437,6 +438,7 @@ module.exports.define("keyChange", function (field, old_val) {
                 this.throwError("keyChange() result = " + result);
             }
             this.db_record_exists = true;
+            this.db_record_key = temp_key;
         }
         this.key = temp_key;
         if (this.trans) {
@@ -444,13 +446,21 @@ module.exports.define("keyChange", function (field, old_val) {
         }
     } catch (e) {
         this.report(e);
-        this.messages.add({
-            type: "E",
-            text: "Error setting key field",
-        });
-        this.duplicate_key = true;
+        duplicate_key = true;
     } finally {
         this.finishedWith(conn, resultset);
+    }
+    if (duplicate_key) {
+        if (!this.duplicate_key_message) {
+            this.duplicate_key_message = this.getMessageManager().add({
+                type: "E",
+                fixed: true,
+            });
+        }
+        this.duplicate_key_message.text = "key value conflicts with another record: " + temp_key;
+    } else if (this.duplicate_key_message) {
+        this.getMessageManager().remove(this.duplicate_key_message);
+        delete this.duplicate_key_message;
     }
 });
 
@@ -459,7 +469,7 @@ module.exports.define("save", function () {
     var conn = this.getConnection("save");
     try {
         if (!this.deleting && !this.isValid()) {
-            this.throwError("cannot save invalid record");
+            this.throwError("cannot save invalid record: " + this.getMessageManager().getString());
         }
         if (!this.db_record_exists && !this.using_max_key_table) {
             this.throwError("cannot save db record non-existent");
@@ -500,6 +510,9 @@ module.exports.define("saveUpdate", function (conn) {
     var sql_string = "UPDATE " + this.table + " SET ";
     var delim = "";
 
+    if (!this.db_record_key) {
+        this.throwError("expecting db_record_key to be set");
+    }
     if (this.trans && this.transactional) {
         sql_string += "_tx=" + this.trans.id + ", ";
     }
@@ -510,7 +523,7 @@ module.exports.define("saveUpdate", function (conn) {
         }
     });
     if (delim) {
-        sql_string += " WHERE _key = " + conn.escape(this.key);
+        sql_string += " WHERE _key = " + conn.escape(this.db_record_key);
         conn.executeUpdate(sql_string);
         if (this.transactional) {
             conn.executeUpdate("REPLACE INTO _history_" + this.table +
@@ -875,6 +888,21 @@ module.exports.define("refreshKeyColumn", function () {
     }
     sql = "UPDATE " + this.table + " SET _key = CONCAT(" + sql + ") WHERE _key <> CONCAT(" + sql + ")";
     SQL.Connection.shared.executeUpdate(sql);
+});
+
+
+module.exports.define("findKeyMergeUpdates", function (from_key, to_key, chg_array) {
+    var that = this;
+    Data.entities.each(function (entity) {
+        if (!entity.view_only) {
+            entity.each(function (field) {
+                if (field.ref_entity === that.id && !field.sql_function) {
+                    that.debug("findKeyMergeUpdates() testing field: " + field.owner.id + "." + field.id);
+                    field.findKeyMergeUpdates(from_key, to_key, chg_array);
+                }
+            });
+        }
+    });
 });
 
 

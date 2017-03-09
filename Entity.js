@@ -293,8 +293,7 @@ module.exports.define("getAutoIncrementColumn", function () {
 module.exports.override("isValid", function () {
     // TODO - some code sets the key of sub-records in page presave(),
     // which is only called if the transaction is valid already
-    return Data.FieldSet.isValid.call(this) && !this.duplicate_key /* && this.isKeyComplete()*/
-            && !this.lock_failure && (!this.messages || !this.messages.error_recorded);
+    return Data.FieldSet.isValid.call(this) && (!this.messages || !this.messages.error_recorded);
 });
 
 
@@ -427,7 +426,7 @@ module.exports.defbind("preventKeyChange", "beforeFieldChange", function (arg) {
         this.throwError("trying to change key field of existing record");
     }
     this.trace("preventKeyChange() " + this.db_record_exists + ", " + this.db_record_locked);
-    if (this.db_record_exists && this.action !== "C" && !this.db_record_locked && !this.lock_failure) {
+    if (this.db_record_exists && this.action !== "C" && !this.db_record_locked && !this.lock_failure_message) {
         this.lock();
     }
 });

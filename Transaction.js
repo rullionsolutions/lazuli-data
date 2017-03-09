@@ -50,6 +50,7 @@ module.exports.override("clone", function (spec) {
     trans.row_number = 0;
     trans.modified = false;
     trans.next_auto_steps_to_perform = [];
+    trans.session.addActiveTransaction(trans);
     return trans;
 });
 
@@ -402,9 +403,6 @@ module.exports.define("save", function (outcome_id) {
     if (!this.isValid()) {
         this.throwError("transaction invalid");
     }
-    if (this.session && this.session.curr_active_trans === this) {
-        this.session.curr_active_trans = null;
-    }
     try {
         this.doFullKeyRows(function (row) {
             if (row.isModified()) {
@@ -415,20 +413,23 @@ module.exports.define("save", function (outcome_id) {
             this.throwError("transaction not active");
         }
         this.tx_row.getField("tx_stat").set("A");
-        this.tx_row.getField("commit_point").set("today");
+        this.tx_row.getField("commit_point").set("NOW");
         this.tx_row.getField("outcome").set(outcome_id || "");
         this.tx_row.save();
         this.connection.executeUpdate("COMMIT");
         this.saved = true;
         Data.LoV.clearLoVCache(this.session);
-    } catch (e) {
-        this.connection.executeUpdate("ROLLBACK");
-        this.connection.executeUpdate("UPDATE ac_tx SET tx_stat='C' WHERE id = " + this.id);    // C = cancelled
-        this.connection.executeUpdate("COMMIT");
-        throw e;
+    // } catch (e) {
+    //     throw e;
     } finally {
+        if (!this.saved) {
+            this.connection.executeUpdate("ROLLBACK");
+            this.connection.executeUpdate("UPDATE ac_tx SET tx_stat='C' WHERE id = " + this.id);    // C = cancelled
+            this.connection.executeUpdate("COMMIT");
+        }
         this.active = false;
         this.connection.finishedWithConnection();
+        this.session.removeActiveTransaction(this.id);
     }
     // this.performNextAutoSteps();
 });
@@ -438,9 +439,7 @@ module.exports.define("cancel", function () {
     if (!this.active) {
         this.throwError("transaction not active");
     }
-    if (this.session && this.session.curr_active_trans === this) {
-        this.session.curr_active_trans = null;
-    }
+    this.session.removeActiveTransaction(this.id);
     this.connection.executeUpdate("ROLLBACK");
     this.doFullKeyRows(function (row) {
         row.cancel(SQL.Connection.shared);               // use the auto-committing connection
