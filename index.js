@@ -65,6 +65,7 @@ exports.fields.add(exports.ContextButton = require("lazuli-data/fields_supl/Cont
 exports.fields.add(exports.DateRange = require("lazuli-data/fields_supl/DateRange.js"));
 exports.fields.add(exports.DotGraph = require("lazuli-data/fields_supl/DotGraph.js"));
 exports.fields.add(exports.Duration = require("lazuli-data/fields_supl/Duration.js"));
+exports.fields.add(exports.Event = require("lazuli-data/fields_supl/Event.js"));
 exports.fields.add(exports.Flex = require("lazuli-data/fields_supl/Flex.js"));
 exports.fields.add(exports.LoVCounter = require("lazuli-data/fields_supl/LoVCounter.js"));
 exports.fields.add(exports.NINumber = require("lazuli-data/fields_supl/NINumber.js"));
