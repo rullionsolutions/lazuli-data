@@ -433,7 +433,8 @@ module.exports.defbind("preventKeyChange", "beforeFieldChange", function (arg) {
 
 
 module.exports.defbind("doKeyChange", "afterFieldChange", function (arg) {
-    this.trace(this.id + "::afterFieldChange(): " + arg.field.old_val + "->" + arg.field.get() + ", trans: " + this.trans);
+    this.trace("doKeyChange(: " + arg.field + ", " + this.isKey(arg.field.getId()) + ", " + arg.field.isValid() + ", " +
+        arg.field.old_val + "->" + arg.field.get() + ", trans: " + this.trans);
     if (this.trans) {
         // only try keyChange() on a valid value
         if (this.isKey(arg.field.getId()) && arg.field.isValid()) {

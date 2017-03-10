@@ -175,6 +175,9 @@ module.exports.defbind("setInitialInternalDate", "setInitial", function () {
 
 module.exports.defbind("validateDate", "validate", function () {
     if (this.val) {                // Only do special validation if non-blank
+        if (!this.internal_date) {          // temp fix - I don't know why this isn't already
+            this.setInternalDate();         // set whenever required - try again...
+        }
         if (this.internal_date) {
             if (this.min && this.val < this.parse(this.min)) {
                 this.messages.add({
