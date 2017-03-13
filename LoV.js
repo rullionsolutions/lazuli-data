@@ -210,7 +210,7 @@ module.exports.define("loadEntityInternal", function (condition, sort, active) {
 
 module.exports.define("loadCollection", function () {
     var that = this;
-    Data.Collection.getCollection(this.collection_id).each(function (source_item) {
+    Core.Collection.getCollection(this.collection_id).each(function (source_item) {
         that.addItem(source_item.id, source_item[that.label_prop],
             !that.active_prop || source_item[that.active_prop]);
     });
