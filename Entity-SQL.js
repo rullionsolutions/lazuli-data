@@ -455,6 +455,7 @@ module.exports.define("keyChange", function (field, old_val) {
             this.duplicate_key_message = this.getMessageManager().add({
                 type: "E",
                 fixed: true,
+                text: "key value conflicts with another record: " + temp_key,
             });
         }
         this.duplicate_key_message.text = "key value conflicts with another record: " + temp_key;

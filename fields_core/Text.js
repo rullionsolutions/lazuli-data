@@ -352,7 +352,12 @@ module.exports.define("getLoVInternal", function (spec) {
                             // avoid caching large data volumes
             //     spec.skip_full_load = this.isAutocompleter();
             // } else {
-            spec.skip_full_load = (entity.data_volume_oom > 1);
+            if (typeof entity.data_volume_oom === "number") {
+                spec.skip_full_load = !!(entity.data_volume_oom > 1);
+            } else {
+                spec.skip_full_load = true;
+            }
+            
             // }
         }
     }
