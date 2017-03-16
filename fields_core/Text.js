@@ -46,6 +46,14 @@ module.exports.register("afterChange");
 module.exports.register("afterTransChange");
 
 
+module.exports.defbind("backwardCompatibility", "cloneType", function () {
+    if (this.config_item && !this.collection_id) {
+        this.collection_id = this.config_item;
+        delete this.config_item;
+    }
+});
+
+
 /**
 * To initialise this field when cloned - sets query_column property based on
 *   table_alias, sql_function and id
@@ -324,6 +332,9 @@ module.exports.define("getLoV", function () {
 
 
 module.exports.define("getOwnLoV", function (spec) {
+    if (this.lov && this.lov.skip_cache) {
+        this.warn("recreating own lov with spec: " + this.view.call(spec));
+    }
     spec = spec || {};
     spec.skip_cache = true;
     this.lov = this.getLoVInternal(spec);
@@ -333,12 +344,12 @@ module.exports.define("getOwnLoV", function (spec) {
 
 module.exports.define("getLoVInternal", function (spec) {
     var entity;
-    spec.list_id = this.list_id || this.list;
-    spec.entity_id = this.ref_entity;
-    spec.collection_id = this.collection_id || this.config_item;
-    spec.label_prop = this.label_prop;
-    spec.active_prop = this.active_prop;
-    spec.connection = this.owner && this.owner.connection;
+    spec.list_id = spec.list_id || this.list_id || this.list;
+    spec.entity_id = spec.entity_id || this.ref_entity;
+    spec.collection_id = spec.collection_id || this.collection_id;
+    spec.label_prop = spec.label_prop || this.label_prop;
+    spec.active_prop = spec.active_prop || this.active_prop;
+    spec.connection = spec.connection || (this.owner && this.owner.connection);
     // include this.owner.connection - to use Transaction's connection if within a transaction
     if (spec.entity_id) {
         entity = Data.entities.get(this.ref_entity);
@@ -356,7 +367,7 @@ module.exports.define("getLoVInternal", function (spec) {
             // }
         }
     }
-    this.lov = Data.LoV.getLoV(spec, this.getSession());
+    this.lov = Data.LoV.getLoV(spec, this.owner && this.owner.trans);
     if (this.allow_unchanged_inactive_value && this.orig_val && this.lov.getItem(this.orig_val)) {
         this.lov.getItem(this.orig_val).active = true;
     }
@@ -486,9 +497,9 @@ module.exports.define("checkUnique", function (val) {
 module.exports.define("getTextFromVal", function () {
     var val = this.get();
     var out = this.detokenize(this.text_pattern);
-    if (this.config_item && !this.isBlank(val)) {
+    if (this.collection_id && !this.isBlank(val)) {
         try {
-            out = "[" + val + "] " + this.getConfigItemText(this.config_item, val);
+            out = "[" + val + "] " + this.getCollectionItemText(this.collection_id, val);
         } catch (e) {        // assume unrecognised config item
             out = e.toString();
             this.report(e);
@@ -518,21 +529,13 @@ module.exports.define("getText", function () {
 *   if this field has a
 * @return [config_item][this.get()].title as a string, otherwise '[unknown]'
 */
-module.exports.define("getConfigItemText", function (config_item, val) {
-    var obj = Core.Collection.getCollection(config_item);
-    var label_prop = this.label_prop || "title";
-
-    if (typeof obj !== "object") {
-        this.throwError("not a collection: " + config_item);
+module.exports.define("getCollectionItemText", function (collection_id, val) {
+    var collection = Core.Collection.getCollectionThrowIfUnrecognized(collection_id);
+    var out = collection.getLabelThrowIfUnrecognized(val);
+    if (typeof out !== "string") {
+        this.throwError(collection_id + "[" + val + "] is not a string");
     }
-    obj = obj.get(val);
-    if (typeof obj !== "object") {
-        this.throwError(val + " not found in " + config_item);
-    }
-    if (typeof obj[label_prop] !== "string") {
-        this.throwError(config_item + "[" + val + "]." + label_prop + " is not a string");
-    }
-    return obj[label_prop];
+    return out;
 });
 
 

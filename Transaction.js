@@ -418,7 +418,7 @@ module.exports.define("save", function (outcome_id) {
         this.tx_row.save();
         this.connection.executeUpdate("COMMIT");
         this.saved = true;
-        Data.LoV.clearLoVCache(this.session);
+        // Data.LoV.clearLoVCache(this.session);
     // } catch (e) {
     //     throw e;
     } finally {
