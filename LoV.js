@@ -14,11 +14,11 @@ module.exports = Core.OrderedMap.clone({
 });
 
 
-module.exports.define("getLoV", function (spec, session) {
+module.exports.define("getLoV", function (spec, trans) {
     var lov;
     var cache_key;
 
-    if (!spec.skip_cache && session) {
+    if (!spec.skip_cache && trans) {
         if (spec.list_id) {
             cache_key = "list:" + spec.list_id;
         } else if (spec.entity_id) {
@@ -27,10 +27,10 @@ module.exports.define("getLoV", function (spec, session) {
             cache_key = "collection:" + spec.collection_id;
         }
         if (cache_key) {
-            if (!session.lov_cache) {
-                session.lov_cache = {};
+            if (!trans.lov_cache) {
+                trans.lov_cache = {};
             }
-            lov = session.lov_cache[cache_key];
+            lov = trans.lov_cache[cache_key];
         }
     }
     // spec.      list_id = spec.      list_id || spec.list;                   // backward-compat
@@ -40,24 +40,24 @@ module.exports.define("getLoV", function (spec, session) {
     //     this.throwError("one of: list_id, entity_id or collection_id must be specified");
     // }
     if (!lov) {
-        if (spec.collection_id && !spec.label_prop) {
-            this.throwError("collection_id requires label_prop");
-        }
+        // if (spec.collection_id && !spec.label_prop) {
+        //     this.throwError("collection_id requires label_prop");
+        // }
         spec.id = (spec.list_id || spec.entity_id || spec.collection_id || "basic") +
             ":" + Core.Format.getRandomNumber(9999);
         spec.instance = true;
         lov = this.clone(spec);
         lov.reload();
-        if (!spec.skip_cache && session && cache_key) {
-            session.lov_cache[cache_key] = lov;
+        if (!spec.skip_cache && trans && cache_key) {
+            trans.lov_cache[cache_key] = lov;
         }
     }
     return lov;
 });
 
 
-module.exports.define("clearLoVCache", function (session) {
-    session.lov_cache = null;
+module.exports.define("clearLoVCache", function (trans) {
+    trans.lov_cache = null;
 });
 
 
@@ -74,11 +74,9 @@ module.exports.define("getEntityLoV", function (entity_id, condition) {
 });
 
 
-module.exports.define("getCollectionLoV", function (collection_id, label_prop, active_prop) {
+module.exports.define("getCollectionLoV", function (collection_id) {
     return this.getLoV({
         collection_id: collection_id,
-        label_prop: label_prop,
-        active_prop: active_prop,
     });
 });
 
@@ -209,11 +207,9 @@ module.exports.define("loadEntityInternal", function (condition, sort, active) {
 
 
 module.exports.define("loadCollection", function () {
-    var that = this;
-    Core.Collection.getCollection(this.collection_id).each(function (source_item) {
-        that.addItem(source_item.id, source_item[that.label_prop],
-            !that.active_prop || source_item[that.active_prop]);
-    });
+    var collection = this.collection ||
+        Core.Collection.getCollectionThrowIfUnrecognized(this.collection_id);
+    collection.populateLoV(this);
     this.complete = true;
 });
 

@@ -14,29 +14,6 @@ module.exports = Data.Text.clone({
 });
 
 
-/*
-module.exports.define("getLoV", function () {
-    if (!this.lov) {
-        if (this.list) {
-            this.lov = LoV.getListLoV(this.list);
-        } else if (this.config_item) {
-            this.lov = LoV.getCollectionLoV(this.config_item, this.label_prop, this.active_prop,
-                this.getSession());
-        } else {
-            this.lov = LoV.getBasicLoV();
-        }
-    }
-    return this.lov;
-});
-
-
-module.exports.define("getOwnLoV", function () {
-    this.lov = LoV.clone({ id: this.list, list: this.list });
-    this.lov.loadList();
-    return this.lov;
-});
-*/
-
 module.exports.define("getCountObject", function () {
     var count_obj;
     try {

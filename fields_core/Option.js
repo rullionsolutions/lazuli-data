@@ -25,7 +25,8 @@ module.exports.defbind("validateOption", "validate", function () {
 
     try {
         this.getLoV();
-    } catch (ignore) {
+    } catch (e) {
+        this.report(e);
         this.messages.add({
             type: "E",
             text: "error with lov",
@@ -68,6 +69,9 @@ module.exports.override("renderUpdateControls", function (div, render_opts, form
         return;
     }
     if (this.lov) {
+        if (!this.lov.complete) {
+            this.lov.reloadComplete();
+        }
         if (this.render_radio) {
             this.lov.renderRadio(div, render_opts, this.val, this.getControl(), css_class,
                 this.mandatory);

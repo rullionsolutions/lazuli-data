@@ -266,6 +266,28 @@ module.exports.define("checkKey", function (key) {
 });
 
 
+module.exports.define("composeKeyFromValues", function (key_values, throw_if_incomplete_key, throw_if_unused_values) {
+    var that = this;
+    var key_fields = this.primary_key.split(",");
+    var key = "";
+    var delim = "";
+    key_fields.forEach(function (key_field_id) {
+        if (key_values[key_field_id]) {
+            key += delim + key_values[key_field_id];
+            delim = ".";
+            delete key_values[key_field_id];
+        } else if (throw_if_incomplete_key) {
+            that.throwError("incomplete key, missing field: " + key_field_id);
+        }
+    });
+    this.debug("composeKeyFromValues() " + key);
+    if (throw_if_unused_values && Object.keys(key_values).length > 0) {
+        this.throwError("unused key values: " + this.view.call(key_values));
+    }
+    return key;
+});
+
+
 module.exports.define("populateFromKey", function (key) {
     var key_fields = this.primary_key.split(",");
     var pieces = key.split(".");
@@ -453,6 +475,16 @@ module.exports.define("linkToParent", function (parent_record, link_field) {
     this.parent_record = parent_record;         // support key change linkage
     this.trans_link_field = link_field;         // invoked when keyChange() calls trans.addToCache()
     // }
+});
+
+
+module.exports.define("getCachedRecordFromKeyValues", function (key_values, trans) {
+    var key = this.composeKeyFromValues(key_values, true, true);
+    trans = trans || this.trans;
+    if (!trans) {
+        this.throwError("no transaction available");
+    }
+    return trans.isInCache(this.id, key);
 });
 
 
