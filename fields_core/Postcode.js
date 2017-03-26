@@ -51,6 +51,8 @@ module.exports.override("getFilterField", function (fieldset, spec, suffix) {
     return fieldset.cloneField(spec.base_field, {
         id: spec.id + "_filt",
         editable: true,
+        mandatory: false,
+        css_reload: false,
         instance: spec.instance,
         regex_pattern: "^[A-Z]{1,2}[0-9]{1,2}",
     });

@@ -611,7 +611,7 @@ module.exports.define("getURLFromVal", function () {
     if (url) {
         if (this.url_expected === "internal") {     // assumed to begin "index.html?page_id=" or similar
             try {
-                if (!this.getSession().allowedURL(url)) {    // §vani.core.7.5.2.2
+                if (!this.getSession().allowedURL(url)) {
                     url = "";
                 }
             } catch (e) {        // Assume is page_not_found exception
