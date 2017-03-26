@@ -1,6 +1,7 @@
 "use strict";
 
 var Data = require("lazuli-data/index.js");
+var UI = require("lazuli-ui/index.js");
 
 
 /**
@@ -52,7 +53,7 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts) 
     ul_elem = this.renderDropdownDiv(parent_elem, "nav_" + this.getControl(), "Navigation options for this item");
     ul_elem.makeElement("li").makeElement("a")
 //        .attribute("class", "css_open_in_modal")
-        .attr("href", "modal?page_id=ac_file_context&page_key=" + this.get())
+        .attr("href", UI.pages.get("ac_file_context").getSimpleURL(this.get()))
         .text("Preview");
     ul_elem.makeElement("li").makeElement("a")
         .attr("href", this.getDownloadURL())
