@@ -25,6 +25,7 @@ module.exports.register("initCreate");
 module.exports.register("initUpdate");
 module.exports.register("load");
 module.exports.register("reload");
+module.exports.register("populate");
 module.exports.register("update");
 module.exports.register("afterTransChange");
 module.exports.register("presave");
