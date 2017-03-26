@@ -15,6 +15,7 @@ module.exports = Data.Text.clone({
     tb_input_list: "input-medium",
     data_length: 10,
     flexbox_size: 4,
+    render_radio: true,         // set field to be radio buttons by default...
     allow_unchanged_inactive_value: true,
 });
 
@@ -96,6 +97,18 @@ module.exports.override("addColumnToTable", function (query_table, col_spec) {
             query_table.alias + (this.sql_function ? "_" : ".") + this.id + ")";
     }
     return column;
+});
+
+
+module.exports.override("getFilterField", function (fieldset, spec, suffix) {
+    return fieldset.cloneField(spec.base_field, {
+        id: spec.id + "_filt",
+        editable: true,
+        mandatory: false,
+        css_reload: false,
+        instance: spec.instance,
+        render_radio: false,            // show filter fields as drop-downs
+    });
 });
 
 
