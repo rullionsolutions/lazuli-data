@@ -288,6 +288,7 @@ module.exports.define("populate", function (resultset) {
         this.key += delim + key_field.get();
         delim = ".";
     }
+    this.happen("populate");
 });
 
 
