@@ -234,9 +234,6 @@ module.exports.override("setFromResultSet", function (resultset) {
         }
     } catch (e) {
         this.report(e);
-        print(this.owner);
-        print(this.owner.page);
-        print(this.owner.session);
         this.getSession().messages.report(e);
 //        new Error();
     }
