@@ -152,7 +152,7 @@ module.exports.defbind("validateReference", "validate", function () {
             type: "E",
             text: "no lov found",
         });
-    } else if (val) {                // Only do special validation if non-blank
+    } else if (val && !this.skip_reference_validation) {                // Only do special validation if non-blank
         try {
             item = this.lov.getItem(val);
         } catch (e) {                // val is invalid

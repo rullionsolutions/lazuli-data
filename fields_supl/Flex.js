@@ -38,7 +38,7 @@ module.exports.define("reset", function (field_spec) {
     if (!field_spec.type) {
         this.throwError("field type must be specified in spec");
     }
-    this.inner_field = Data.Text.fields.getThrowIfUnrecognized(field_spec.type).clone(field_spec);
+    this.inner_field = Data.fields.getThrowIfUnrecognized(field_spec.type).clone(field_spec);
     // Allows inner_field to know which record it is part of...
     this.inner_field.owner = this.owner;
     this.inner_field.control = this.control;
