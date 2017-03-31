@@ -67,9 +67,9 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
 * @return css class string
 */
 module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
-    var css_class = "control-group css_type_" + this.css_type;      // control-group in TB2, form-group in TB3
+    var css_class = "form-group css_type_" + this.css_type;      // control-group in TB2, -group in TB3
     if (!this.isValid()) {
-        css_class += " error";                          // has-error in TB3
+        css_class += " has-error";                          // has-error in TB3
     }
     if (this.isEditable()) {
         css_class += " css_edit";
@@ -156,9 +156,9 @@ module.exports.define("getLabelCSSClass", function (form_type) {
     if (form_type === "form-inline-labelless") {
         css_class += " sr-only";
     }
-    // if (form_type === "form-horizontal") {                           TB3
-    //     css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
-    // }
+    if (form_type === "form-horizontal") {                           // TB3
+        css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
+    }
     return css_class;
 });
 
@@ -182,17 +182,18 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
 */
 module.exports.define("renderEditable", function (div, render_opts, form_type) {
     if (this.input_group_addon_before || this.input_group_addon_after) {
-//        div = div.makeElement("div", "input-group");              TB3
-        div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") + (this.input_group_addon_after ? "input-append " : ""));
+        div = div.makeElement("div", "input-group");              // TB3
+        // div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") +
+        // (this.input_group_addon_after ? "input-append " : ""));
     }
     if (this.input_group_addon_before) {
-//        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);    TB3
-        div.makeElement("span", "add-on").text(this.input_group_addon_before);
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);    // TB3
+        // div.makeElement("span", "add-on").text(this.input_group_addon_before);
     }
     this.renderUpdateControls(div, render_opts, form_type);
     if (this.input_group_addon_after) {
-//        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);     TB3
-        div.makeElement("span", "add-on").text(this.input_group_addon_after);
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);     // TB3
+        // div.makeElement("span", "add-on").text(this.input_group_addon_after);
     }
 });
 
