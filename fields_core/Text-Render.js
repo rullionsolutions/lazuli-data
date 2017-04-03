@@ -54,8 +54,8 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
         this.renderLabel(div, render_opts, form_type);
     }
     if (form_type === "form-horizontal") {
-//        div = div.makeElement("div", this.getAllWidths(editable));                // TB3
-        div = div.makeElement("div", "controls");
+        div = div.makeElement("div", this.getAllWidths(editable));                // TB3
+        // div = div.makeElement("div", "controls");
     }
     this.renderControl(div, render_opts, form_type);
     return div;
@@ -91,9 +91,9 @@ module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
     if (form_type === "basic") {
         css_class += " " + this.getAllWidths(editable);
     }
-    // if (form_type === "flexbox") {
-    //     css_class += " fb-item-" + this.getFlexboxSize();
-    // }
+    if (form_type === "flexbox") {
+        css_class += " fb-item-" + this.getFlexboxSize();
+    }
     return css_class;
 });
 
@@ -207,7 +207,7 @@ module.exports.define("renderUpdateControls", function (div, render_opts, form_t
 
 module.exports.define("getInputSizeCSSClass", function (form_type) {
     if (form_type === "form-horizontal") {
-        return "input-block-level";
+        return "form-control";
     }
     return this.tb_input;
 });

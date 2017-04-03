@@ -20,7 +20,7 @@ module.exports = Data.Text.clone({
     data_length: 10,
 //    update_length: 8,
 //    tb_span: 2,
-    tb_input: "input-mini",
+    tb_input: "input-sm",
     week_start_day: 0,            // 0 = Sun, 1 = Mon, etc
     error_message: "not a valid date",
 });

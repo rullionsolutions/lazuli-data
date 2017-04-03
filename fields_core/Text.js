@@ -19,7 +19,7 @@ module.exports = Core.Base.clone({
     search_filter: "Filter",
     table_alias: "A",
     input_type: "text",
-    tb_input: "input-medium",
+    tb_input: "input-sm",
     disp_col_lg: 2,
     disp_col_md: 3,
     disp_col_sm: 4,
@@ -368,7 +368,7 @@ module.exports.define("getLoVInternal", function (spec) {
             } else {
                 spec.skip_full_load = true;
             }
-            
+
             // }
         }
     }

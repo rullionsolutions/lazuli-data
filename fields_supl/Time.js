@@ -17,7 +17,7 @@ module.exports = Data.Number.clone({
 // isn't working properly on client-side
 //    regex_pattern         : "([0-1][0-9]|2[0-3]):([0-5][0-9])",
     regex_label: "Not a valid time",
-    tb_input_list: "input-small",
+    tb_input_list: "input-sm",
 });
 
 /**

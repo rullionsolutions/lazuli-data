@@ -34,7 +34,7 @@ module.exports.override("renderUneditable", function (elem, render_opts) {
     }
     if (this.url && render_opts.show_links !== false) {
         elem.makeElement("a")
-            .attr("class", "btn btn-mini")       // removed css_open_in_modal
+            .attr("class", "btn btn-xs")       // removed css_open_in_modal
             .attr("href", this.url)
             .text(this.btn_label, true);
     }

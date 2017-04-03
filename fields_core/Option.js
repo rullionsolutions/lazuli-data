@@ -12,7 +12,7 @@ module.exports = Data.Text.clone({
     auto_search_oper: "EQ",
     unknown_label: "[unknown]: ",
 //    tb_span: 2,
-    tb_input_list: "input-medium",
+    tb_input_list: "input-sm",
     data_length: 10,
     flexbox_size: 4,
     render_radio: true,         // set field to be radio buttons by default...
@@ -63,7 +63,7 @@ module.exports.override("getTextFromVal", function () {
 
 
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
-    var css_class = this.getInputSizeCSSClass(form_type); /* TB£: "form-control" */
+    var css_class = "";
     try {
         this.getLoV();
     } catch (ignore) {
@@ -77,6 +77,7 @@ module.exports.override("renderUpdateControls", function (div, render_opts, form
             this.lov.renderRadio(div, render_opts, this.val, this.getControl(), css_class,
                 this.mandatory);
         } else {
+            css_class = this.getInputSizeCSSClass(form_type); /* TB£: "form-control" */
             this.lov.renderDropdown(div, render_opts, this.val, this.getControl(), css_class,
                 this.mandatory);
         }
