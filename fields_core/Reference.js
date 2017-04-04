@@ -22,13 +22,6 @@ module.exports = Data.Text.clone({
 });
 
 
-module.exports.defbind("setCSSType", "cloneInstance", function () {
-    if (this.css_type === "reference") {
-        this.css_type = (this.isAutocompleter() ? "autocompleter" : "dropdown");
-    }
-});
-
-
 module.exports.override("addToPage", function (page) {
     Data.Text.addToPage.call(this, page);
     if (this.link_to_parent && this.owner.trans) {
@@ -353,6 +346,15 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     });
 
     return count;
+});
+
+
+module.exports.override("getCSSType", function () {
+    var css_type = this.css_type;
+    if (css_type === "reference") {
+        css_type = (this.isAutocompleter() ? "autocompleter" : "dropdown");
+    }
+    return css_type;
 });
 
 

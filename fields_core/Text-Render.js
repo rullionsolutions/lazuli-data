@@ -67,7 +67,8 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
 * @return css class string
 */
 module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
-    var css_class = "form-group css_type_" + this.css_type;      // control-group in TB2, -group in TB3
+    var css_type = this.getCSSType();
+    var css_class = "form-group css_type_" + css_type;      // control-group in TB2, -group in TB3
     if (!this.isValid()) {
         css_class += " has-error";                          // has-error in TB3
     }
@@ -95,6 +96,11 @@ module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
         css_class += " fb-item-" + this.getFlexboxSize();
     }
     return css_class;
+});
+
+
+module.exports.define("getCSSType", function () {
+    return this.css_type;
 });
 
 
@@ -181,8 +187,12 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
 * @return the XmlStream object representing the control (e.g. input)
 */
 module.exports.define("renderEditable", function (div, render_opts, form_type) {
-    if (this.input_group_addon_before || this.input_group_addon_after) {
-        div = div.makeElement("div", "input-group");              // TB3
+    var css_class = "input-group";
+    if (this.input_group_addon_before || this.input_group_addon_after || this.input_group_size) {
+        if (this.input_group_size) {
+            css_class += " " + this.input_group_size;
+        }
+        div = div.makeElement("div", css_class);              // TB3
         // div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") +
         // (this.input_group_addon_after ? "input-append " : ""));
     }
@@ -200,16 +210,17 @@ module.exports.define("renderEditable", function (div, render_opts, form_type) {
 
 module.exports.define("renderUpdateControls", function (div, render_opts, form_type) {
                                                                             // form-control for TB3
-    div.makeInput(this.input_type, null, this.getUpdateText(), this.getInputSizeCSSClass(form_type),
+    div.makeInput(this.input_type, null, this.getUpdateText(),
+        this.getInputSizeCSSClass(form_type),
         this.placeholder || this.helper_text);
 });
 
 
 module.exports.define("getInputSizeCSSClass", function (form_type) {
-    if (form_type === "form-horizontal") {
-        return "form-control";
-    }
-    return this.tb_input;
+    // if (form_type === "form-horizontal") {
+    return "form-control";
+    // }
+    // return this.tb_input;
 });
 
 
@@ -307,16 +318,7 @@ module.exports.define("renderNavOptions", function (parent_elem, render_opts) {
 * @return text
 */
 module.exports.define("renderErrors", function (parent_elem, render_opts) {
-    // var text,
-    //     help_elem;
-
-    if (!this.isValid()) {
-        this.messages.renderErrors(parent_elem, render_opts);
-        // text = this.messages.getString();
-        // help_elem = div.makeElement("span", "help-block").text(text);
-        // Log.debug("Error text for field " + this.toString() + " = " + text);
-    }
-    // return text;
+    this.messages.renderErrors(parent_elem, render_opts);
 });
 
 

@@ -16,6 +16,7 @@ module.exports = Data.Text.clone({
     data_length: 10,
     flexbox_size: 4,
     render_radio: true,         // set field to be radio buttons by default...
+    render_items_inline: true,
     allow_unchanged_inactive_value: true,
 });
 
@@ -55,6 +56,11 @@ module.exports.defbind("validateOption", "validate", function () {
 });
 
 
+module.exports.override("getCSSType", function () {
+    return (this.render_radio ? "radio_buttons" : this.css_type);
+});
+
+
 module.exports.override("getTextFromVal", function () {
     this.text = "";
     this.validate();
@@ -75,7 +81,7 @@ module.exports.override("renderUpdateControls", function (div, render_opts, form
         }
         if (this.render_radio) {
             this.lov.renderRadio(div, render_opts, this.val, this.getControl(), css_class,
-                this.mandatory);
+                this.mandatory, this.render_items_inline);
         } else {
             css_class = this.getInputSizeCSSClass(form_type); /* TB£: "form-control" */
             this.lov.renderDropdown(div, render_opts, this.val, this.getControl(), css_class,
