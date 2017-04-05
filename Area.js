@@ -2,7 +2,7 @@
 
 var Core = require("lapis-core/index.js");
 var Data = require("lazuli-data/index.js");
-var IO = require("lazuli-io/index.js");
+var Rhino = require("lazuli-rhino/index.js");
 
 /**
 * To represent a functional area of the system
@@ -18,7 +18,16 @@ module.exports.defbind("setupTextStrings", "clone", function () {
     this.text_strings = {};
     // areas[this.id] = this;
     Data.areas.add(this);
-    this.path = IO.File.getDirectory("../" + module.id);
+    // this won't work!
+    // this.path = IO.File.getDirectory("../" + module.id);
+});
+
+
+module.exports.define("getPath", function () {
+    if (!this.path) {
+        this.path = Rhino.app.sapphire_dir + "/" + this.id;
+    }
+    return this.path;
 });
 
 
