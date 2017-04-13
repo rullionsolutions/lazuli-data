@@ -72,12 +72,15 @@ module.exports.define("getMessageManager", function () {
 * @param string id of the entity
 * @return new row object (clone of x.entities[entity_id]) belonging to this transaction
 */
-module.exports.define("createNewRow", function (entity_id, addl_data) {
+module.exports.define("createNewRow", function (entity, addl_data) {
     var row;
     if (!this.active) {
         this.throwError("transaction not active");
     }
-    row = Data.entities.get(entity_id).getTransRow(this, "C", null, addl_data);
+    if (typeof entity === "string") {
+        entity = Data.entities.get(entity);
+    }
+    row = entity.getTransRow(this, "C", null, addl_data);
     this.new_rows.push(row);            // add to new_rows cache before generating key
     row.setDefaultVals();
     row.generateKey();                  // which may move it into the curr_rows cache
@@ -95,16 +98,19 @@ module.exports.define("createNewRow", function (entity_id, addl_data) {
 * @param string id of the entity; string key referencing the row
 * @return row object (clone of x.entities[entity_id]) belonging to this transaction
 */
-module.exports.define("getActiveRow", function (entity_id, key) {
+module.exports.define("getActiveRow", function (entity, key) {
     var row;
     if (!this.active) {
         this.throwError("transaction not active");
     }
-    row = this.isInCache(entity_id, key);
+    if (typeof entity === "string") {
+        entity = Data.entities.get(entity);
+    }
+    row = this.isInCache(entity.id, key);
     if (row) {
         return row;
     }
-    row = Data.entities.get(entity_id).getTransRow(this, "U", key);
+    row = entity.getTransRow(this, "U", key);
     row.load(key);                    // throws 'Record not found' if not found
     this.addToCache(row);
     row.happen("initUpdate");
@@ -115,16 +121,19 @@ module.exports.define("getActiveRow", function (entity_id, key) {
 });
 
 
-module.exports.define("getRow", function (entity_id, key, addl_data) {
+module.exports.define("getRow", function (entity, key, addl_data) {
     var row;
     if (!this.active) {
         this.throwError("transaction not active");
     }
-    row = this.isInCache(entity_id, key);
+    if (typeof entity === "string") {
+        entity = Data.entities.get(entity);
+    }
+    row = this.isInCache(entity.id, key);
     if (row) {
         return row;
     }
-    row = Data.entities.get(entity_id).getTransRow(this, "", key, addl_data);
+    row = entity.getTransRow(this, "", key, addl_data);
     try {
         row.load(key);                // throws 'Record not found' if not found
         // added to Entity.keyChange() to happen automatically whenever a key field is changed
