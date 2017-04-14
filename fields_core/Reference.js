@@ -22,13 +22,6 @@ module.exports = Data.Text.clone({
 });
 
 
-module.exports.defbind("setCSSType", "cloneInstance", function () {
-    if (this.css_type === "reference") {
-        this.css_type = (this.isAutocompleter() ? "autocompleter" : "dropdown");
-    }
-});
-
-
 module.exports.override("addToPage", function (page) {
     Data.Text.addToPage.call(this, page);
     if (this.link_to_parent && this.owner.trans) {
@@ -152,7 +145,8 @@ module.exports.defbind("validateReference", "validate", function () {
             type: "E",
             text: "no lov found",
         });
-    } else if (val && !this.skip_reference_validation) {                // Only do special validation if non-blank
+                                // Only do special validation if non-blank
+    } else if (val && !this.skip_reference_validation) {
         try {
             item = this.lov.getItem(val);
         } catch (e) {                // val is invalid
@@ -164,7 +158,7 @@ module.exports.defbind("validateReference", "validate", function () {
                 && this.owner.trans.isInCache(this.ref_entity, val)) {
             this.text = this.owner.trans.getRow(this.ref_entity, val).getLabel("reference");
         } else {
-            this.text = "[unknown: " + val + "]";
+            this.text = val;
             this.messages.add({
                 type: "E",
                 text: "invalid reference: " + val,
@@ -353,6 +347,15 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     });
 
     return count;
+});
+
+
+module.exports.override("getCSSType", function () {
+    var css_type = this.css_type;
+    if (css_type === "reference") {
+        css_type = (this.isAutocompleter() ? "autocompleter" : "dropdown");
+    }
+    return css_type;
 });
 
 

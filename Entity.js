@@ -36,15 +36,15 @@ module.exports.defbind("setupEntity", "cloneType", function () {
     this.table = this.table || this.id;
     if (!this.skip_registration) {
         Data.entities.add(this);
-    }
-    if (this.parent_entity) {            // parent_entity MUST be loaded first
-        this.trace("Linking " + this.id + " to its parent " + this.parent_entity);
-        // parent entities will have to be loaded before their children!
-        parent_entity = Data.entities.getThrowIfUnrecognized(this.parent_entity);
-        if (!parent_entity.children) {
-            parent_entity.children = {};
+        if (this.parent_entity) {            // parent_entity MUST be loaded first
+            this.trace("Linking " + this.id + " to its parent " + this.parent_entity);
+            // parent entities will have to be loaded before their children!
+            parent_entity = Data.entities.getThrowIfUnrecognized(this.parent_entity);
+            if (!parent_entity.children) {
+                parent_entity.children = {};
+            }
+            parent_entity.children[this.id] = this;
         }
-        parent_entity.children[this.id] = this;
     }
 });
 

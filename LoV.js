@@ -277,33 +277,34 @@ module.exports.define("renderDropdown", function (div, render_opts, val, control
 });
 
 
-module.exports.define("renderRadio", function (div, render_opts, val, control, css_class, mandatory) {
-    var inner;
+module.exports.define("renderRadio", function (div, render_opts, val, control, css_class, mandatory, inline) {
+    // var inner;
     if (!this.complete) {
         this.throwError("LoV is not complete");
     }
-    inner = div.makeElement("span", css_class, control);
+    // inner = div.makeElement("span", css_class, control);
+    // only offer a blank option if the field is allowed to be non-blank
     if (!mandatory) {
-        inner.makeRadioLabelSpan(control, "", (this.blank_label || "[blank]"), !val);
+        div.makeRadioWithLabel(control, "", (this.blank_label || "[blank]"), !val, inline);
     }
     this.each(function (item) {
         if (item.active) {
-            inner.makeRadioLabelSpan(control, item.id, item.label, (item.id === val));
+            div.makeRadioWithLabel(control, item.id, item.label, (item.id === val), inline);
         }
     });
 });
 
 
-module.exports.define("renderMulti", function (div, render_opts, control, pieces, css_class) {
-    var inner;
+module.exports.define("renderMulti", function (div, render_opts, control, pieces, css_class, inline) {
+    // var inner;
     if (!this.complete) {
         this.throwError("LoV is not complete");
     }
-    inner = div.makeElement("span", css_class, control);
+    // inner = div.makeElement("span", css_class, control);
     this.each(function (item) {
         if (item.active) {
-            inner.makeCheckboxLabelSpan(control, item.id, item.label,
-                (pieces.indexOf(item.id) > -1));
+            div.makeCheckboxWithLabel(control, item.id, item.label,
+                (pieces.indexOf(item.id) > -1), inline);
         }
     });
 });

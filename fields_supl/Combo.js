@@ -29,8 +29,8 @@ module.exports = Data.Reference.clone({
 */
 
 
-module.exports.override("setCSSType", function () {
-    this.css_type = "combo";
+module.exports.override("getCSSType", function () {
+    return "combo";
 });
 
 
