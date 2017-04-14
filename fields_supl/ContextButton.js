@@ -61,7 +61,7 @@ module.exports.override("renderControl", function (div_elmt, render_opts, form_t
 
 
 module.exports.define("getButtonCSSClass", function () {
-    var css_class = "btn btn-" + this.tb_size;
+    var css_class = "btn btn-default btn-" + this.tb_size;
     if (this.btn_css_class) {
         css_class += " " + this.btn_css_class;
     }

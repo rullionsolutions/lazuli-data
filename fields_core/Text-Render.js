@@ -54,8 +54,8 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
         this.renderLabel(div, render_opts, form_type);
     }
     if (form_type === "form-horizontal") {
-//        div = div.makeElement("div", this.getAllWidths(editable));                // TB3
-        div = div.makeElement("div", "controls");
+        div = div.makeElement("div", this.getAllWidths(editable));                // TB3
+        // div = div.makeElement("div", "controls");
     }
     this.renderControl(div, render_opts, form_type);
     return div;
@@ -67,9 +67,10 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
 * @return css class string
 */
 module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
-    var css_class = "control-group css_type_" + this.css_type;      // control-group in TB2, form-group in TB3
+    var css_type = this.getCSSType();
+    var css_class = "form-group css_type_" + css_type;      // control-group in TB2, -group in TB3
     if (!this.isValid()) {
-        css_class += " error";                          // has-error in TB3
+        css_class += " has-error";                          // has-error in TB3
     }
     if (this.isEditable()) {
         css_class += " css_edit";
@@ -91,10 +92,15 @@ module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
     if (form_type === "basic") {
         css_class += " " + this.getAllWidths(editable);
     }
-    // if (form_type === "flexbox") {
-    //     css_class += " fb-item-" + this.getFlexboxSize();
-    // }
+    if (form_type === "flexbox") {
+        css_class += " fb-item-" + this.getFlexboxSize();
+    }
     return css_class;
+});
+
+
+module.exports.define("getCSSType", function () {
+    return this.css_type;
 });
 
 
@@ -156,9 +162,9 @@ module.exports.define("getLabelCSSClass", function (form_type) {
     if (form_type === "form-inline-labelless") {
         css_class += " sr-only";
     }
-    // if (form_type === "form-horizontal") {                           TB3
-    //     css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
-    // }
+    if (form_type === "form-horizontal") {                           // TB3
+        css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
+    }
     return css_class;
 });
 
@@ -181,34 +187,40 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
 * @return the XmlStream object representing the control (e.g. input)
 */
 module.exports.define("renderEditable", function (div, render_opts, form_type) {
-    if (this.input_group_addon_before || this.input_group_addon_after) {
-//        div = div.makeElement("div", "input-group");              TB3
-        div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") + (this.input_group_addon_after ? "input-append " : ""));
+    var css_class = "input-group";
+    if (this.input_group_addon_before || this.input_group_addon_after || this.input_group_size) {
+        if (this.input_group_size) {
+            css_class += " " + this.input_group_size;
+        }
+        div = div.makeElement("div", css_class);              // TB3
+        // div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") +
+        // (this.input_group_addon_after ? "input-append " : ""));
     }
     if (this.input_group_addon_before) {
-//        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);    TB3
-        div.makeElement("span", "add-on").text(this.input_group_addon_before);
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);    // TB3
+        // div.makeElement("span", "add-on").text(this.input_group_addon_before);
     }
     this.renderUpdateControls(div, render_opts, form_type);
     if (this.input_group_addon_after) {
-//        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);     TB3
-        div.makeElement("span", "add-on").text(this.input_group_addon_after);
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);     // TB3
+        // div.makeElement("span", "add-on").text(this.input_group_addon_after);
     }
 });
 
 
 module.exports.define("renderUpdateControls", function (div, render_opts, form_type) {
                                                                             // form-control for TB3
-    div.makeInput(this.input_type, null, this.getUpdateText(), this.getInputSizeCSSClass(form_type),
+    div.makeInput(this.input_type, null, this.getUpdateText(),
+        this.getInputSizeCSSClass(form_type),
         this.placeholder || this.helper_text);
 });
 
 
 module.exports.define("getInputSizeCSSClass", function (form_type) {
-    if (form_type === "form-horizontal") {
-        return "input-block-level";
-    }
-    return this.tb_input;
+    // if (form_type === "form-horizontal") {
+    return "form-control";
+    // }
+    // return this.tb_input;
 });
 
 
@@ -306,16 +318,7 @@ module.exports.define("renderNavOptions", function (parent_elem, render_opts) {
 * @return text
 */
 module.exports.define("renderErrors", function (parent_elem, render_opts) {
-    // var text,
-    //     help_elem;
-
-    if (!this.isValid()) {
-        this.messages.renderErrors(parent_elem, render_opts);
-        // text = this.messages.getString();
-        // help_elem = div.makeElement("span", "help-block").text(text);
-        // Log.debug("Error text for field " + this.toString() + " = " + text);
-    }
-    // return text;
+    this.messages.renderErrors(parent_elem, render_opts);
 });
 
 

@@ -10,6 +10,7 @@ module.exports = Data.Text.clone({
     css_type: "attributes",
     search_oper_list: "sy.search_oper_list_attr",
     auto_search_oper: "AN",
+    render_items_inline: true,
 });
 
 
@@ -119,7 +120,8 @@ module.exports.override("renderUpdateControls", function (div, render_opts, form
     if (!this.lov) {
         this.throwError("no lov found");
     }
-    this.lov.renderMulti(div, render_opts, this.getControl(), pieces);
+    this.lov.renderMulti(div, render_opts, this.getControl(), pieces, null,
+        this.render_items_inline);
 });
 
 

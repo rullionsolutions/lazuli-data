@@ -29,30 +29,30 @@ module.exports.override("getPrefix", function () {
 });
 
 
-module.exports.define("renderErrors", function (parent_elem, render_opts) {
-    var text_client = "";
-    var delim_client = "";
-    var text_server = "";
-    var delim_server = "";
+module.exports.define("renderMessage", function (msg, parent_elem, render_opts) {
+    parent_elem.makeElement("span")
+        .attr("data-msg-type", msg.type)
+        .text(msg.text);
+});
+
+
+module.exports.define("renderErrors", function (parent_elem, server_messages_elem, render_opts) {
+    var messages_elem;
     var i;
     var msg;
 
+    messages_elem = parent_elem.makeElement("span", "help-block css_client_messages css_hide");
     for (i = 0; i < this.messages.length; i += 1) {
         msg = this.messages[i];
         if (msg.cli_side_revalidate) {
-            text_client += delim_client + msg.text;
-            delim_client = "\n";
-        } else {
-            text_server += delim_server + msg.text;
-            delim_server = "\n";
+            this.renderMessage(msg, messages_elem, render_opts);
         }
     }
-    if (text_client) {
-        parent_elem.makeElement("span", "help-block css_client_messages").text(text_client);
-        this.debug("Client-side Error text for field " + this.toString() + " = " + text_client);
-    }
-    if (text_server) {
-        parent_elem.makeElement("span", "help-block css_server_messages").text(text_server);
-        this.debug("Server-side Error text for field " + this.toString() + " = " + text_server);
+    messages_elem = parent_elem.makeElement("span", "help-block css_server_messages css_hide");
+    for (i = 0; i < this.messages.length; i += 1) {
+        msg = this.messages[i];
+        if (!msg.cli_side_revalidate) {
+            this.renderMessage(msg, messages_elem, render_opts);
+        }
     }
 });

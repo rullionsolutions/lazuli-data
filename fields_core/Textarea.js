@@ -14,7 +14,7 @@ module.exports = Data.Text.clone({
     separate_row_in_form: true,
     rows: 5,
     tb_span: 12,
-    tb_input_list: "input-xlarge",
+    tb_input_list: "input-lg",
 //    update_length         : 80,
     data_length: -1,        // Ignore in Text.validate()
     db_type: "B",
