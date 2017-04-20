@@ -12,7 +12,7 @@ module.exports = Data.Text.clone({
     css_type: "reference",          // mapped to autocompleter or dropdown by setCSSType() below
     search_oper_list_option: "sy.search_oper_list_option",
     auto_search_oper: "EQ",
-    url_pattern: "?page_id={ref_entity}_display&page_key={val}",
+    url_pattern: "#page_id={ref_entity}_display&page_key={val}",
     data_length: null,
 //    nav_dropdown_icon: "&#x25BD;",
 //    nav_link_icon: "&#x25B7;",

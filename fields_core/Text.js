@@ -614,7 +614,7 @@ module.exports.define("getURLFromVal", function () {
         url = val ? this.detokenize(this.url_pattern) : "";
     }
     if (url) {
-        if (this.url_expected === "internal") {     // assumed to begin "index.html?page_id=" or similar
+        if (this.url_expected === "internal") {     // assumed to begin "index.html#page_id=" or similar
             try {
                 if (!this.getSession().allowedURL(url)) {
                     url = "";
