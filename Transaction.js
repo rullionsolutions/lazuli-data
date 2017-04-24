@@ -354,6 +354,57 @@ module.exports.define("getPartialKeyRowCount", function (modified_only) {
 });
 
 
+module.exports.define("getRecordCount", function () {
+    var count_obj = this.getRecordCountFullKey();
+    this.getRecordCountPartialKey(count_obj);
+    count_obj.total = count_obj.full_key_total + count_obj.partial_key_total;
+    count_obj.modified_total = count_obj.full_key_modified + count_obj.partial_key_modified;
+    count_obj.unmodified_total = count_obj.full_key_unmodified + count_obj.partial_key_unmodified;
+    return count_obj;
+});
+
+
+module.exports.define("getRecordCountFullKey", function (count_obj) {
+    count_obj = count_obj || {};
+    count_obj.full_key_modified = 0;
+    count_obj.full_key_unmodified = 0;
+    count_obj.full_key_valid = 0;
+    count_obj.full_key_invalid = 0;
+    count_obj.full_key_total = 0;
+    this.doFullKeyRecords(function (record) {
+        count_obj.full_key_total += 1;
+        if (record.isModified()) {
+            count_obj.full_key_modified += 1;
+        } else {
+            count_obj.full_key_unmodified += 1;
+        }
+        if (record.isValid()) {
+            count_obj.full_key_valid += 1;
+        } else {
+            count_obj.full_key_invalid += 1;
+        }
+    });
+    return count_obj;
+});
+
+
+module.exports.define("getRecordCountPartialKey", function (count_obj) {
+    count_obj = count_obj || {};
+    count_obj.partial_key_modified = 0;
+    count_obj.partial_key_unmodified = 0;
+    count_obj.partial_key_total = 0;
+    this.doPartialKeyRecords(function (record) {
+        count_obj.partial_key_total += 1;
+        if (record.isModified()) {
+            count_obj.partial_key_modified += 1;
+        } else {
+            count_obj.partial_key_unmodified += 1;
+        }
+    });
+    return count_obj;
+});
+
+
 module.exports.define("getPartialKeyRowsDescription", function () {
     var text = "";
     var delim = "";
