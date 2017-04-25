@@ -55,40 +55,40 @@ module.exports.override("getTextFromVal", function () {
 });
 
 module.exports.define("renderListHeader", function (row_elmt, render_opts, css_class) {
-    var i = 0,
-        elmt = row_elmt.addChild("th", null, (css_class || "") + " daterange");
+    var i = 0;
+    var elmt = row_elmt.makeElement("th", (css_class || "") + " daterange");
 
     if (this.width) {
-        elmt.attribute("style", "width: " + this.width);
+        elmt.attr("style", "width: " + this.width);
     }
     if (this.min_width) {
-        elmt.attribute("style", "min-width: " + this.min_width);
+        elmt.attr("style", "min-width: " + this.min_width);
     }
     if (this.max_width) {
-        elmt.attribute("style", "max-width: " + this.max_width);
+        elmt.attr("style", "max-width: " + this.max_width);
     }
     if (this.description && render_opts.dynamic_page !== false) {
         elmt.makeTooltip(this.hover_text_icon, this.description);
         elmt.text("&nbsp;", true);
     }
-    elmt.addChild("div").text(this.label);
-    elmt = elmt.addChild("div");
+    elmt.makeElement("div").text(this.label);
+    elmt = elmt.makeElement("div");
     while (((i * this.pixels_per_tick) / this.pixels_per_day) < this.days_range) {
     // while ((i * this.pixels_per_tick) < this.total_width_pixels) {
-        elmt.addChild("span").text(this.getTickLabel(i));
+        elmt.makeElement("span").text(this.getTickLabel(i));
         i += 1;
     }
 });
 
 module.exports.override("renderCell", function (row_elem, render_opts) {
-    var cell_elem = row_elem.addChild("td", null, "daterange");
+    var cell_elem = row_elem.makeElement("td", "daterange");
     return this.renderFormGroup(cell_elem, render_opts, "table-cell");
 });
 
 
 module.exports.define("getTickLabel", function (i) {
-    var date = Date.parse(this.zero_date + "+" + i + this.scale),
-        out  = date.format(this.tick_label_format);
+    var date = Date.parse(this.zero_date + "+" + i + this.scale);
+    var out = date.format(this.tick_label_format);
 
     if (this.scale === "months") {
         out = out.substr(0, 3);
@@ -104,7 +104,7 @@ module.exports.override("renderUneditable", function (elem, render_opts) {
         return;
     }
     inner = elem.makeElement("a");
-    inner.attr("rel"  , "tooltip");
+    inner.attr("rel", "tooltip");
     inner.attr("title", this.getText());
     inner.attr("style", this.getUneditableCSSStyle());
 
@@ -119,19 +119,20 @@ module.exports.override("renderUneditable", function (elem, render_opts) {
     rect = svg .makeElement("rect");
     rect.attr("x", String(start * this.pixels_per_day));
     rect.attr("y", "0");
-    rect.attr("width" , String((this.getDaysFromZero(this.getEnd()) - start) * this.pixels_per_day));
+    rect.attr("width" , String((this.getDaysFromZero(this.getEnd()) - start) *
+         this.pixels_per_day));
     rect.attr("height", String(this.height));
 */
 });
 
 
 module.exports.override("getUneditableCSSStyle", function () {
-    var out = "",
-        positioning = this.getPositioning();
+    var out = "";
+    var positioning = this.getPositioning();
 
     if (!this.isBlank()) {
         out = "margin-left: " + positioning.left_offset_pixels + "px; " +
-              "width: "       + positioning.      width_pixels + "px;";
+            "width: " + positioning.width_pixels + "px;";
 
         if (positioning.colour) {
             out += " color: " + positioning.colour + ";";
@@ -145,11 +146,11 @@ module.exports.define("getPositioning", function () {
     var out = {};
     if (!this.isBlank()) {
         out.start_days_from_zero = this.getDaysFromZero(this.getStart());
-        out.  end_days_from_zero = this.getDaysFromZero(this.getEnd());
-        out.days_between         = out.  end_days_from_zero - out.start_days_from_zero;
-        out.left_offset_pixels   = out.start_days_from_zero * this.pixels_per_day;
-        out.width_pixels         = out.days_between         * this.pixels_per_day;
-        out.colour               = null;
+        out.end_days_from_zero = this.getDaysFromZero(this.getEnd());
+        out.days_between = out.end_days_from_zero - out.start_days_from_zero;
+        out.left_offset_pixels = out.start_days_from_zero * this.pixels_per_day;
+        out.width_pixels = out.days_between * this.pixels_per_day;
+        out.colour = null;
     }
     this.debug("DateRange.getPositioning(): " + JSON.stringify(out));
     return out;

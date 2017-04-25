@@ -640,16 +640,18 @@ module.exports.define("addAutoCompleterFilterCondition", function (query) {
 // });
 module.exports.define("renderLineItem", function (element, render_opts) {
     var display_page = this.getDisplayPage();
-    var anchor = element.makeAnchor(this.getLabel("list_item"), display_page && display_page.getSimpleURL(this.getKey()));
+    var anchor = element.makeAnchor(this.getLabel("list_item"),
+        display_page && display_page.getSimpleURL(this.getKey()));
     return anchor;
 });
 
 
 module.exports.define("renderTile", function (parent_elem, render_opts) {
-    var div_elem = parent_elem.addChild("div", this.id + "_" + this.getKey(), this.getTileCSSClass(render_opts));
+    var div_elem = parent_elem.makeElement("div", this.getTileCSSClass(render_opts),
+        this.id + "_" + this.getKey());
     var css_style = this.getTileCSSStyle(render_opts);
     if (css_style) {
-        div_elem.attribute("style", css_style);
+        div_elem.attr("style", css_style);
     }
     this.addTileURL(div_elem, render_opts);
     this.addTileContent(div_elem, render_opts);
@@ -667,10 +669,6 @@ module.exports.define("getTileCSSStyle", function (render_opts) {
 
 
 module.exports.define("addTileURL", function (div_elem, render_opts) {
-    // var display_page = this.getDisplayPage();
-    // if (display_page) {
-    //     div_elem.attr("url", display_page.getSimpleURL(this.getKey()));
-    // }
     if (!this.tile_control_field) {
         this.tile_control_field = Data.Reference.clone({
             id: "_tile_control",
@@ -683,7 +681,8 @@ module.exports.define("addTileURL", function (div_elem, render_opts) {
         });
     }
     this.tile_control_field.set(this.getKey());
-    this.tile_control_field.renderNavOptions(div_elem.makeElement("span"), render_opts, this);
+    this.tile_control_field.renderNavOptions(div_elem.makeElement("span"),
+        render_opts, this);
 });
 
 
@@ -702,7 +701,8 @@ module.exports.define("addTileContent", function (div_elem, render_opts) {
 
 module.exports.define("getDotGraphNode", function (render_opts, highlight) {
     var key = this.getKey();
-    var out = key + " [ label=\"" + this.getLabel("dotgraph") + "\" URL=\"" + this.getDisplayURL(key) + "\"";
+    var out = key + " [ label=\"" + this.getLabel("dotgraph") + "\" URL=\"" +
+        this.getDisplayURL(key) + "\"";
     if (highlight) {
         out += " style=\"filled\" fillcolor=\"#f8f8f8\"";
     }

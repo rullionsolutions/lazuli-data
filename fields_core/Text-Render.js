@@ -249,11 +249,11 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
         this.validate();
     }
     if (this.getText() !== this.val) {
-        span_elem.attribute("val", this.val);
+        span_elem.attr("val", this.val);
     }
     style = this.getUneditableCSSStyle();
     if (style) {
-        span_elem.attribute("style", style);
+        span_elem.attr("style", style);
     }
     url = this.getURL();
     text = this.getText();
@@ -261,15 +261,16 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
         nav_options = this.renderNavOptions(span_elem, render_opts);
     }
     if (url && !nav_options && render_opts.show_links !== false) {
-        span_elem = span_elem.addChild("a");
-        span_elem.attribute("href", url);
+        span_elem = span_elem.makeElement("a");
+        span_elem.attr("href", url);
         if (this.url_target) {
-            span_elem.attribute("target", this.url_target);
+            span_elem.attr("target", this.url_target);
         }
         if (this.unicode_icon) {
-            span_elem.addChild("span", null, this.unicode_icon_class).addText(this.unicode_icon, true);
+            span_elem.makeElement("span", this.unicode_icon_class)
+                .text(this.unicode_icon, true);
         } else if (this.button_class) {            // Render URL Field as button
-            span_elem.attribute("class", this.button_class);
+            span_elem.attr("class", this.button_class);
         }
         if (this.url_link_text && !this.isBlank()) {
             text = this.url_link_text;
@@ -278,7 +279,7 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
     if (text) {
         if (!render_opts.hide_images) {     // CL - Image don't tend to render in excel exports
             if (this.decoration_icon) {     // CL - I think HttpServer.escape renders this useless
-                span_elem.addText(this.decoration_icon, true);
+                span_elem.text(this.decoration_icon, true);
             }
 //            if (this.icon) {
 //                elem.addChild("img")
@@ -286,7 +287,7 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
 //                    .attribute("src", this.icon);
 //            }
         }
-        span_elem.addText(text);
+        span_elem.text(text);
     }
 });
 
@@ -324,9 +325,8 @@ module.exports.define("renderErrors", function (parent_elem, render_opts) {
 
 // Used in Reference and File
 module.exports.define("renderDropdownDiv", function (parent_elem, control, tooltip) {
-    var div_elem = parent_elem.makeElement("div", (this.dropdown_button ? "btn-group" : "dropdown"));
-//    div_elem = parent_elem.addChild("div", null,
-//          (this.nav_dropdown_a_class.indexOf("btn") === -1 ? "dropdown" : "btn-group"));
+    var div_elem = parent_elem.makeElement("div",
+        (this.dropdown_button ? "btn-group" : "dropdown"));
     if (this.dropdown_button) {
         div_elem.makeDropdownButton(control, this.dropdown_label, this.dropdown_url, tooltip,
             this.dropdown_css_class, this.dropdown_right_align);

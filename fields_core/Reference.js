@@ -324,15 +324,15 @@ module.exports.override("renderNavOptions", function (parent_elem, render_opts, 
     function renderDropdown() {
         ul_elem = that.renderDropdownDiv(parent_elem, "nav_" + that.getControl(), "Navigation options for this item");
         if (context_url) {
-            ul_elem.addChild("li").makeAnchor("Preview", context_url, "css_open_in_modal");
+            ul_elem.makeElement("li").makeAnchor("Preview", context_url);
             count += 1;
         }
         if (display_url) {
-            ul_elem.addChild("li").makeAnchor("Display", display_url);
+            ul_elem.makeElement("li").makeAnchor("Display", display_url);
             count += 1;
         }
         if (count > 0) {
-            ul_elem.addChild("li", null, "divider");
+            ul_elem.makeElement("li", null, "divider");
         }
     }
 

@@ -173,11 +173,11 @@ module.exports.define("reload", function (key) {
                 this.curr_tx = SQL.Connection.getColumnString(resultset, "A._tx");
             }
         }
-    } catch (e) {
-        this.report(e);
-        if (e.lock_wait_timeout) {
-            this.throwError("record locked: " + this.title + ": " + key);
-        }
+    // } catch (e) {
+    //     this.report(e);
+    //     if (e.lock_wait_timeout) {
+    //         this.throwError("record locked: " + this.title + ": " + key);
+    //     }
     } finally {
         this.finishedWith(conn, resultset);
     }

@@ -57,7 +57,6 @@ exports.fields.add(exports.Reference = require("lazuli-data/fields_core/Referenc
 exports.fields.add(exports.File = require("lazuli-data/fields_core/File.js"));          // File inherits from Reference
 exports.fields.add(exports.Textarea = require("lazuli-data/fields_core/Textarea.js"));
 exports.fields.add(exports.URL = require("lazuli-data/fields_core/URL.js"));
-exports.fields.add(exports.WorkflowState = require("lazuli-data/fields_core/WorkflowState.js"));
 
 exports.fields.add(exports.Binary = require("lazuli-data/fields_supl/Binary.js"));
 exports.fields.add(exports.Combo = require("lazuli-data/fields_supl/Combo.js"));

@@ -678,7 +678,7 @@ module.exports.define("addClientSideProperties", function (span, render_opts) {
             delete obj[key];
         }
     });
-    span.addChild("span", null, "css_hide css_render_data", JSON.stringify(obj));
+    span.makeElement("span", "css_hide css_render_data", JSON.stringify(obj));
 });
 
 

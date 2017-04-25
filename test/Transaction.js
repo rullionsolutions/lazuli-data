@@ -341,7 +341,7 @@ function isSorted(arr) {
 }
 
 module.exports.main = function (test) {
-    var session      = Session.clone({ user_id: "batch" }),
+    var session      = Session.getNewSession({ user_id: "batch" }),
         trans        = session.getNewTrans(),
         existingRows = trans.getExistingRows();
 
