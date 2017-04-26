@@ -9,7 +9,11 @@ module.exports = Core.MessageManager.clone({
 
 
 module.exports.override("getPrefix", function () {
-    return (this.record.row_number === 0) ? "" : this.record.getLabel();
+    var out = "";
+    if (this.record.trans && this.record.trans.getRecordCount().total > 1) {
+        out = this.record.title + ": " + this.record.getLabel();
+    }
+    return out;
 });
 
 

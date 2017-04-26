@@ -371,7 +371,7 @@ module.exports.define("getRecordCountFullKey", function (count_obj) {
     count_obj.full_key_valid = 0;
     count_obj.full_key_invalid = 0;
     count_obj.full_key_total = 0;
-    this.doFullKeyRecords(function (record) {
+    this.doFullKeyRows(function (record) {
         count_obj.full_key_total += 1;
         if (record.isModified()) {
             count_obj.full_key_modified += 1;
@@ -393,7 +393,7 @@ module.exports.define("getRecordCountPartialKey", function (count_obj) {
     count_obj.partial_key_modified = 0;
     count_obj.partial_key_unmodified = 0;
     count_obj.partial_key_total = 0;
-    this.doPartialKeyRecords(function (record) {
+    this.doPartialKeyRows(function (record) {
         count_obj.partial_key_total += 1;
         if (record.isModified()) {
             count_obj.partial_key_modified += 1;
