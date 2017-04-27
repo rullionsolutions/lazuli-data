@@ -132,7 +132,8 @@ module.exports.define("getTimePart", function () {
 module.exports.define("getTimePartUpdate", function () {
     var time_part = this.getTimePart();
     if (time_part) {
-        time_part = this.parse(time_part, this.internal_format_parts[1],
+        time_part = this.parse(time_part,
+            this.internal_format_parts[1],
             this.update_format_parts[1]);
     }
     return time_part;
@@ -140,6 +141,10 @@ module.exports.define("getTimePartUpdate", function () {
 
 
 module.exports.override("renderUpdateControls", function (div) {
-    div.makeInput("text", null, this.getDatePartUpdate(), "css_date_part input-mini", this.update_format_parts[0]);
-    div.makeInput("text", null, this.getTimePartUpdate(), "css_time_part input-mini", this.update_format_parts[1]);
+    div.makeInput("text", null, this.getDatePartUpdate(), "css_date_part form-control",
+        this.update_format_parts[0])
+        .attr("style", "display: inline; width: 100px;");
+    div.makeInput("text", null, this.getTimePartUpdate(), "css_time_part form-control",
+        this.update_format_parts[1])
+        .attr("style", "display: inline; width: 100px;");
 });
