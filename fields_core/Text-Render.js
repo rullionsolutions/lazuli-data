@@ -68,9 +68,11 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
 */
 module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
     var css_type = this.getCSSType();
-    var css_class = "form-group css_type_" + css_type;      // control-group in TB2, -group in TB3
+    var css_class = "form-group css_type_" + css_type;      // control-group in TB2
     if (!this.isValid()) {
-        css_class += " has-error";                          // has-error in TB3
+        css_class += " has-error";
+    } else if (this.isModified()) {
+        css_class += " has-success";
     }
     if (this.isEditable()) {
         css_class += " css_edit";
@@ -162,7 +164,7 @@ module.exports.define("getLabelCSSClass", function (form_type) {
     if (form_type === "form-inline-labelless") {
         css_class += " sr-only";
     }
-    if (form_type === "form-horizontal") {                           // TB3
+    if (form_type === "form-horizontal") {
         css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
     }
     return css_class;
@@ -192,17 +194,17 @@ module.exports.define("renderEditable", function (div, render_opts, form_type) {
         if (this.input_group_size) {
             css_class += " " + this.input_group_size;
         }
-        div = div.makeElement("div", css_class);              // TB3
+        div = div.makeElement("div", css_class);
         // div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") +
         // (this.input_group_addon_after ? "input-append " : ""));
     }
     if (this.input_group_addon_before) {
-        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);    // TB3
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);
         // div.makeElement("span", "add-on").text(this.input_group_addon_before);
     }
     this.renderUpdateControls(div, render_opts, form_type);
     if (this.input_group_addon_after) {
-        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);     // TB3
+        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);
         // div.makeElement("span", "add-on").text(this.input_group_addon_after);
     }
 });
