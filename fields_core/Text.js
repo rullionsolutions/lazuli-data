@@ -28,6 +28,8 @@ module.exports = Core.Base.clone({
     edit_col_md: 8,
     edit_col_sm: 10,
     edit_col_xs: 10,
+    min_parts_expected: 1,
+    max_parts_expected: 1,
     unicode_icon: "&#x27BD;",              // Heavy Wedge-Tailed Rightwards Arrow; x25B7 = open right-pointing triangle
     unicode_icon_class: "css_uni_icon",
     hover_text_icon: "&#x24D8;",
@@ -662,6 +664,8 @@ module.exports.define("appendClientSideProperties", function (obj) {
     obj.input_mask = this.input_mask;
     obj.before_validation = this.before_validation;
     obj.auto_search_oper = this.auto_search_oper;
+    obj.min_parts_expected = this.min_parts_expected;
+    obj.max_parts_expected = this.max_parts_expected;
 });
 
 

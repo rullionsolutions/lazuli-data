@@ -13,6 +13,7 @@ module.exports = Data.Text.clone({
     data_length: 20,
     list: "sy.duration",
     default_period: "weeks",
+    render_items_inline: true,
 });
 
 
@@ -143,12 +144,24 @@ module.exports.override("getTextFromVal", function () {
 });
 
 
+module.exports.override("appendClientSideProperties", function (obj) {
+    Data.Text.appendClientSideProperties.call(this, obj);
+    if (this.lov) {
+        obj.min_parts_expected = this.lov.getTotalActiveItems() + 1;
+        obj.max_parts_expected = this.lov.getTotalActiveItems() + 1;
+    }
+});
+
+
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
     var parts = this.getParts();
-    div.makeInput("text", null, (typeof parts.number === "number" ? String(parts.number) : ""));
+    div.makeInput("text", null, (typeof parts.number === "number" ? String(parts.number) : ""),
+        this.getInputSizeCSSClass(form_type),
+        this.placeholder || this.helper_text);
+
     if (!this.lov) {
         this.lov = Data.LoV.getListLoV(this.list);
     }
     this.lov.renderRadio(div, render_opts, parts.period, this.getControl(), this.css_class,
-        this.mandatory);
+        true, this.render_items_inline);
 });

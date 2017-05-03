@@ -7,8 +7,50 @@ var Data = require("lazuli-data/index.js");
 module.exports = Data.Text.clone({
     id: "NINumber",
     data_length: 9,
+    css_reload: true,           // field must reload
+    gender_list: "rm.gender",
     regex_pattern: "^[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}[0-9]{6}[A-DFM]{0,1}$",
     regex_label: "must be a valid UK NI number",
+});
+
+
+module.exports.defbind("setupGenderLov", "cloneInstance", function () {
+    var undisclosed_item;
+    this.gender_lov = Data.LoV.getListLoV(this.gender_list);
+    undisclosed_item = this.gender_lov.getItem("ZZ");
+    if (undisclosed_item) {
+        undisclosed_item.active = false;
+    }
+    this.attempting_ni_input = true;            // to begin with
+});
+
+
+module.exports.override("appendClientSideProperties", function (obj) {
+    Data.Text.appendClientSideProperties.call(this, obj);
+    if (this.attempting_ni_input) {
+        obj.min_parts_expected = 2;
+        obj.max_parts_expected = 2;
+    } else {
+        obj.min_parts_expected = 4;
+        obj.max_parts_expected = 4;
+    }
+});
+
+
+module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
+    if (this.attempting_ni_input) {
+        div.makeInput(this.input_type, null, this.getUpdateText(),
+            this.getInputSizeCSSClass(form_type),
+            this.placeholder || this.helper_text);
+    } else {
+        div.makeInput("text", null, this.unknown_ni_date, "css_date_part form-control",
+            "dd/mm/yy")
+            .attr("style", "display: inline; width: 100px;");
+        this.gender_lov.renderRadio(div, render_opts, this.unknown_ni_gender, "css_date_part form-control",
+            true, true);
+    }
+    div.makeElement("span").text("if NI is unknown:");
+    div.makeCheckbox(this.getControl() + "_is_unknown", "Y", !this.attempting_ni_input);
 });
 
 

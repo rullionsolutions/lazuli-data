@@ -310,6 +310,17 @@ module.exports.define("renderMulti", function (div, render_opts, control, pieces
 });
 
 
+module.exports.define("getTotalActiveItems", function () {
+    var count = 0;
+    this.each(function (item) {
+        if (item.active) {
+            count += 1;
+        }
+    });
+    return count;
+});
+
+
 module.exports.define("getCountObject", function () {
     var count_obj = {};
     this.each(function (item) {

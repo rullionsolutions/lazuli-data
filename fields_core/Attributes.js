@@ -114,6 +114,15 @@ module.exports.override("getTextFromVal", function () {
 });
 
 
+module.exports.override("appendClientSideProperties", function (obj) {
+    Data.Text.appendClientSideProperties.call(this, obj);
+    if (this.lov) {
+        obj.min_parts_expected = this.lov.getTotalActiveItems();
+        obj.max_parts_expected = this.lov.getTotalActiveItems();
+    }
+});
+
+
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
     var pieces = this.get().split(/\|/);
     this.getLoV();

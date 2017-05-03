@@ -22,6 +22,8 @@ module.exports = Data.Date.clone({
     update_format: "dd/MM/yy HH:mm",
     display_format: "dd/MM/yy HH:mm:ss",
     data_length: 20,
+    min_parts_expected: 2,
+    max_parts_expected: 2,
     regex_label1: "not a valid date",                                // client side
     regex_label2: "invalid time, please use the 24 hour clock",      // client side
     // regex_pattern1: "[0-3]?[0-9]/[0-1]?[0-9]/[0-9]{2}",                // client side

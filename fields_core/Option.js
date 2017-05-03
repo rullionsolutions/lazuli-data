@@ -68,6 +68,15 @@ module.exports.override("getTextFromVal", function () {
 });
 
 
+module.exports.override("appendClientSideProperties", function (obj) {
+    Data.Text.appendClientSideProperties.call(this, obj);
+    if (this.lov && this.render_radio) {
+        obj.min_parts_expected = this.lov.getTotalActiveItems() + (this.mandatory ? 0 : 1);
+        obj.max_parts_expected = this.lov.getTotalActiveItems() + (this.mandatory ? 0 : 1);
+    }
+});
+
+
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
     var css_class = "";
     try {
