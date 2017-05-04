@@ -15,6 +15,7 @@ module.exports = Core.Base.clone({
     fully_identify_rows_in_messages: false,
 });
 
+module.exports.register("beforeCommit");
 
 module.exports.override("clone", function (spec) {
     var trans;
@@ -99,16 +100,19 @@ module.exports.define("createNewRow", function (entity, addl_data) {
 */
 module.exports.define("getActiveRow", function (entity, key) {
     var row;
+
+    row = this.isInCache(entity, key);
+    if (row) {
+        return row;
+    }
+
     if (!this.active) {
         this.throwError("transaction not active");
     }
     if (typeof entity === "string") {
         entity = Data.entities.get(entity);
     }
-    row = this.isInCache(entity.id, key);
-    if (row) {
-        return row;
-    }
+
     row = entity.getTransRow(this, "U", key);
     row.load(key);                    // throws 'Record not found' if not found
     this.addToCache(row);
@@ -468,6 +472,7 @@ module.exports.define("save", function (outcome_id) {
                 row.save();
             }
         });
+        this.happen("beforeCommit");
         if (!this.active) {
             this.throwError("transaction not active");
         }
