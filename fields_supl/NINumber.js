@@ -39,18 +39,38 @@ module.exports.override("appendClientSideProperties", function (obj) {
 
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
     if (this.attempting_ni_input) {
-        div.makeInput(this.input_type, null, this.getUpdateText(),
+        div.makeInput("text", null, this.getUpdateText(),
             this.getInputSizeCSSClass(form_type),
             this.placeholder || this.helper_text);
     } else {
-        div.makeInput("text", null, this.unknown_ni_date, "css_date_part form-control",
-            "dd/mm/yy")
+        div.makeInput("text", null, this.unknown_ni_date, "form-control", "dd/MM/yy")
             .attr("style", "display: inline; width: 100px;");
-        this.gender_lov.renderRadio(div, render_opts, this.unknown_ni_gender, "css_date_part form-control",
+        this.gender_lov.renderRadio(div, render_opts, this.unknown_ni_gender, "form-control",
             true, true);
     }
     div.makeElement("span").text("if NI is unknown:");
-    div.makeCheckbox(this.getControl() + "_is_unknown", "Y", !this.attempting_ni_input);
+    div.makeCheckbox("is_unknown", "Y", !this.attempting_ni_input);
+});
+
+
+module.exports.override("setFromParamValue", function (str) {
+    var parts = str.split("|");
+    var new_val = "";
+    if (this.attempting_ni_input) {
+        new_val = parts[0];
+    } else {
+        new_val = "TN";
+        if (parts.length > 1) {
+            this.unknown_ni_date = parts[0];
+            new_val += parts[0].replace(/\//g, "");
+        }
+        if (parts.length > 2) {
+            this.unknown_ni_gender = parts[1];
+            new_val += parts[1];
+        }
+    }
+    this.attempting_ni_input = !(parts[parts.length - 1] === "Y");
+    this.set(new_val);
 });
 
 
