@@ -15,6 +15,7 @@ module.exports = Core.Base.clone({
     fully_identify_rows_in_messages: false,
 });
 
+module.exports.register("beforeCommit");
 
 module.exports.override("clone", function (spec) {
     var trans;
@@ -468,6 +469,7 @@ module.exports.define("save", function (outcome_id) {
                 row.save();
             }
         });
+        this.happen("beforeCommit");
         if (!this.active) {
             this.throwError("transaction not active");
         }
@@ -508,4 +510,17 @@ module.exports.define("cancel", function () {
 // Don't want to do this normally
 //    this.reportErrors();
     this.active = false;
+});
+
+module.exports.define("addEmail", function (spec) {
+    var email;
+    if (this.page) {
+        email = this.page.addEmail(spec);
+    } else {
+        spec.trans = this;
+        spec.session = this.session;
+        email = Data.entities.get("ac_email").create(spec);
+        email.send();
+    }
+    return email;
 });
