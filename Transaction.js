@@ -100,16 +100,19 @@ module.exports.define("createNewRow", function (entity, addl_data) {
 */
 module.exports.define("getActiveRow", function (entity, key) {
     var row;
+
+    row = this.isInCache(entity, key);
+    if (row) {
+        return row;
+    }
+
     if (!this.active) {
         this.throwError("transaction not active");
     }
     if (typeof entity === "string") {
         entity = Data.entities.get(entity);
     }
-    row = this.isInCache(entity.id, key);
-    if (row) {
-        return row;
-    }
+
     row = entity.getTransRow(this, "U", key);
     row.load(key);                    // throws 'Record not found' if not found
     this.addToCache(row);
@@ -510,17 +513,4 @@ module.exports.define("cancel", function () {
 // Don't want to do this normally
 //    this.reportErrors();
     this.active = false;
-});
-
-module.exports.define("addEmail", function (spec) {
-    var email;
-    if (this.page) {
-        email = this.page.addEmail(spec);
-    } else {
-        spec.trans = this;
-        spec.session = this.session;
-        email = Data.entities.get("ac_email").create(spec);
-        email.send();
-    }
-    return email;
 });
