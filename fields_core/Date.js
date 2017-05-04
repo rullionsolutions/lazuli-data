@@ -130,8 +130,8 @@ module.exports.define("beforeSet", function (val) {
         val = val.format(this.internal_format);
     } else if (typeof val === "string") {
         try {
-            val = Core.Format.parseDateExpression(val, this.internal_format,
-                this.internal_format);
+            val = Core.Format.parseDateExpressionToDate(val, this.internal_format)
+                .format(this.internal_format);
         } catch (e) {
             this.debug(e);
         }
@@ -144,7 +144,8 @@ module.exports.define("beforeSet", function (val) {
 module.exports.override("setFromParamValue", function (str) {
     try {
         str = str.replace(/\|/g, " ");
-        str = Core.Format.parseDateExpression(str, this.update_format, this.internal_format);
+        str = Core.Format.parseDateExpressionToDate(str, this.update_format)
+            .format(this.internal_format);
     } catch (e) {
         this.debug(e);
     }
@@ -213,6 +214,7 @@ module.exports.override("appendClientSideProperties", function (obj) {
     Data.Text.appendClientSideProperties.call(this, obj);
     obj.min = this.min ? Date.parse(this.min) : null;
     obj.max = this.max ? Date.parse(this.max) : null;
+    obj.update_format = this.update_format;
 });
 
 
