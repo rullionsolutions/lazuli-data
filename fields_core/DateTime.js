@@ -20,10 +20,10 @@ module.exports = Data.Date.clone({
     css_type: "datetime",
     internal_format: "yyyy-MM-dd HH:mm:ss",
     update_format: "dd/MM/yy HH:mm",
-    display_format: "dd/MM/yy HH:mm:ss",
+    display_format: "dd/MM/yy HH:mm",
     data_length: 20,
-    min_parts_expected: 2,
-    max_parts_expected: 2,
+    // min_parts_expected: 2,
+    // max_parts_expected: 2,
     regex_label1: "not a valid date",                                // client side
     regex_label2: "invalid time, please use the 24 hour clock",      // client side
     // regex_pattern1: "[0-3]?[0-9]/[0-1]?[0-9]/[0-9]{2}",                // client side
@@ -31,7 +31,7 @@ module.exports = Data.Date.clone({
     error_message: "not a valid date/time",
 });
 
-
+/*
 module.exports.defbind("setFormatsMasks", "cloneInstance", function () {
     this.internal_format_parts = this.internal_format.split(" ");
     if (this.internal_format_parts.length !== 2) {
@@ -46,10 +46,14 @@ module.exports.defbind("setFormatsMasks", "cloneInstance", function () {
     //     this.throwError("invalid  display_format for DateTime: " + this. display_format);
     // }
     this.input_mask_parts = this.update_format.replace(/\w/g, "9").split(" ");
-    this.regex_pattern1 = "^" + this.update_format_parts[0].replace("dd", "[0-3]?[0-9]").replace("MM", "[0-1]?[0-9]").replace("yy", "[0-9]{2}") + "$";
-    this.regex_pattern2 = "^" + this.update_format_parts[1].replace("HH", "([01]?[0-9]|2[0-3])").replace("mm", "[0-5][0-9]").replace("ss", "[0-5][0-9]") + "$";
-    this.trace("setFormatsMasks(): " + this.internal_format_parts + ", " + this.update_format_parts);
+    this.regex_pattern1 = "^" + this.update_format_parts[0].replace("dd",
+        "[0-3]?[0-9]").replace("MM", "[0-1]?[0-9]").replace("yy", "[0-9]{2}") + "$";
+    this.regex_pattern2 = "^" + this.update_format_parts[1].replace("HH",
+        "([01]?[0-9]|2[0-3])").replace("mm", "[0-5][0-9]").replace("ss", "[0-5][0-9]") + "$";
+    this.trace("setFormatsMasks(): " + this.internal_format_parts + ", " +
+        this.update_format_parts);
 });
+*/
 
 /*
 module.exports.override("isBefore", function (date) {
@@ -78,6 +82,7 @@ module.exports.override("beforeSet", function (val) {
 });
 */
 
+/*
 module.exports.override("appendClientSideProperties", function (obj) {
     Data.Date.appendClientSideProperties.call(this, obj);
     obj.min = this.min ? Date.parse(this.min) : null;
@@ -89,6 +94,7 @@ module.exports.override("appendClientSideProperties", function (obj) {
     obj.regex_pattern2 = this.regex_pattern2;
     obj.input_mask2 = this.input_mask_parts[1];
 });
+*/
 
 module.exports.define("getDatePart", function () {
     var val_split = [];
@@ -142,11 +148,11 @@ module.exports.define("getTimePartUpdate", function () {
 });
 
 
-module.exports.override("renderUpdateControls", function (div) {
-    div.makeInput("text", null, this.getDatePartUpdate(), "css_date_part form-control",
-        this.update_format_parts[0])
-        .attr("style", "display: inline; width: 100px;");
-    div.makeInput("text", null, this.getTimePartUpdate(), "css_time_part form-control",
-        this.update_format_parts[1])
-        .attr("style", "display: inline; width: 100px;");
-});
+// module.exports.override("renderUpdateControls", function (div) {
+    // div.makeInput("text", null, this.getDatePartUpdate(), "css_date_part form-control",
+    //     this.update_format_parts[0])
+    //     .attr("style", "display: inline; width: 100px;");
+    // div.makeInput("text", null, this.getTimePartUpdate(), "css_time_part form-control",
+    //     this.update_format_parts[1])
+    //     .attr("style", "display: inline; width: 100px;");
+// });
