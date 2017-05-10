@@ -39,6 +39,13 @@ module.exports.override("set", function (new_val) {
 });
 
 
+module.exports.override("appendClientSideProperties", function (obj) {
+    Data.Text.appendClientSideProperties.call(this, obj);
+    obj.min_parts_expected = this.css_richtext ? 0 : 1;
+    obj.max_parts_expected = this.css_richtext ? 0 : 1;
+});
+
+
 module.exports.override("renderUpdateControls", function (div, render_opts, form_type) {
     if (this.css_richtext && render_opts.enable_aloha !== false) {
         div.makeElement("div", "css_richtext_target").text(this.val, true);        // true = don't escape markup
