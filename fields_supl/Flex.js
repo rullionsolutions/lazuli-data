@@ -38,6 +38,7 @@ module.exports.define("reset", function (field_spec) {
     if (!field_spec.type) {
         this.throwError("field type must be specified in spec");
     }
+    field_spec.instance = true;
     this.inner_field = Data.fields.getThrowIfUnrecognized(field_spec.type).clone(field_spec);
     // Allows inner_field to know which record it is part of...
     this.inner_field.owner = this.owner;
@@ -175,25 +176,32 @@ module.exports.override("getUpdateText", function () {
 // });
 
 
-module.exports.override("renderEditable", function (div, render_opts, inside_table) {
+module.exports.override("addClientSideProperties", function (div, render_opts) {
     if (this.inner_field) {
-        return this.inner_field.renderEditable(div, render_opts, inside_table);
+        this.inner_field.addClientSideProperties(div, render_opts);
+    }
+});
+
+
+module.exports.override("renderEditable", function (div, render_opts, form_type) {
+    if (this.inner_field) {
+        return this.inner_field.renderEditable(div, render_opts, form_type);
     }
     return null;
 });
 
 
-module.exports.override("renderUneditable", function (div, render_opts, inside_table) {
+module.exports.override("renderUneditable", function (div, render_opts) {
     if (this.inner_field) {
-        return this.inner_field.renderUneditable(div, render_opts, inside_table);
+        return this.inner_field.renderUneditable(div, render_opts);
     }
     return null;
 });
 
 
-module.exports.override("renderErrors", function (span, render_opts, inside_table) {
+module.exports.override("renderErrors", function (span, render_opts) {
     if (this.inner_field) {
-        return this.inner_field.renderErrors(span, render_opts, inside_table);
+        return this.inner_field.renderErrors(span, render_opts);
     }
     return null;
 });
