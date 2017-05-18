@@ -20,7 +20,7 @@ module.exports = Data.Reference.clone({
 
 
 module.exports.define("getDownloadURL", function () {
-    return "dyn/" + this.getText() + "?mode=filedown&id=" + this.get();
+    return "dyn/" + encodeURIComponent(this.getText()) + "?mode=filedown&id=" + this.get();
 });
 
 
