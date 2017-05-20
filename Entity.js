@@ -109,6 +109,17 @@ module.exports.define("getTransRow", function (trans, action, key, addl_data) {
     return row;
 });
 
+module.exports.define("updateWorkflowState", function (outcome_id, is_primary_row) {
+    this.each(function (field) {
+        if (field.type === "WorkflowState") {
+            if (is_primary_row) {
+                field.presaveEntryPoint(outcome_id);
+            } else {
+                field.presaveAction();
+            }
+        }
+    });
+});
 
 module.exports.define("getMessageManager", function () {
     if (!this.messages) {
