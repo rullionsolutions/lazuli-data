@@ -22,7 +22,7 @@ module.exports.define("renderCell", function (row_elem, render_opts) {
 * @return css class string
 */
 module.exports.define("getCellCSSClass", function () {
-    var css_class = "";
+    var css_class = this.css_class_col_cell || "";
     if (this.css_align) {
         css_class += " css_align_" + this.css_align;
     }

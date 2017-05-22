@@ -28,6 +28,7 @@ module.exports = Core.Base.clone({
     edit_col_md: 8,
     edit_col_sm: 10,
     edit_col_xs: 10,
+    min_col_width: "100px",
     min_parts_expected: 1,
     max_parts_expected: 1,
     unicode_icon: "&#x27BD;",              // Heavy Wedge-Tailed Rightwards Arrow; x25B7 = open right-pointing triangle
