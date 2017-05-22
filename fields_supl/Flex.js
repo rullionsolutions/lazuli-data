@@ -2,6 +2,7 @@
 
 "use strict";
 
+var Core = require("lapis-core/index.js");
 var Data = require("lazuli-data/index.js");
 var SQL = require("lazuli-sql/index.js");
 var Rhino = require("lazuli-rhino/index.js");
@@ -18,7 +19,6 @@ module.exports = Data.Text.clone({
     db_type: "B",
     sortable: false,            // Flex fields cannot be used to sort lists
     search_criterion: false,    // prevent Flex fields from ever being search criteria
-
 });
 
 
@@ -32,19 +32,22 @@ module.exports = Data.Text.clone({
 
 
 module.exports.define("reset", function (field_spec) {
-    if (!field_spec.id || typeof field_spec.id !== "string") {
+    var new_field_spec = Core.Base.addProperties.call({}, field_spec);
+    if (!new_field_spec.id || typeof new_field_spec.id !== "string") {
         this.throwError("id must be non-blank string");
     }
-    if (!field_spec.type) {
+    if (!new_field_spec.type) {
         this.throwError("field type must be specified in spec");
     }
-    field_spec.instance = true;
-    this.inner_field = Data.fields.getThrowIfUnrecognized(field_spec.type).clone(field_spec);
+    new_field_spec.instance = true;
+    this.inner_field = Data.fields.getThrowIfUnrecognized(new_field_spec.type)
+        .clone(new_field_spec);
+
     // Allows inner_field to know which record it is part of...
     this.inner_field.owner = this.owner;
     this.inner_field.control = this.control;
-    if (typeof field_spec.val === "string") {
-        this.inner_field.setInitial(field_spec.val);
+    if (typeof new_field_spec.val === "string") {
+        this.inner_field.setInitial(new_field_spec.val);
     }
 
     this.debug("Flex.reset(): " + this.owner + ", " + (this.owner.action || "no owner"));
