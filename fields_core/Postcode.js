@@ -32,7 +32,7 @@ module.exports.define("getDistrict", function (val) {
     if (!val) {
         val = this.get();
     }
-    val = Core.Format.trim(val);
+    val = Core.Format.trim(val) || "";
     match = val.match(/^[A-Z]{1,2}[0-9]{1,2}/);
     if (match && match.length > 0) {
         return match[0];
