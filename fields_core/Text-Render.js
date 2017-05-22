@@ -54,7 +54,7 @@ module.exports.define("renderFormGroup", function (element, render_opts, form_ty
         this.renderLabel(div, render_opts, form_type);
     }
     if (form_type === "form-horizontal") {
-        div = div.makeElement("div", this.getAllWidths(editable));                // TB3
+        div = div.makeElement("div", this.form_horiz_field_col_size);                // TB3
         // div = div.makeElement("div", "controls");
     }
     this.renderControl(div, render_opts, form_type);
@@ -165,7 +165,7 @@ module.exports.define("getLabelCSSClass", function (form_type) {
         css_class += " sr-only";
     }
     if (form_type === "form-horizontal") {
-        css_class += " col-lg-2 col-md-2 col-sm-2 col-xs-2";
+        css_class += " " + this.form_horiz_label_col_size;
     }
     return css_class;
 });
