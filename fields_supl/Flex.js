@@ -232,13 +232,11 @@ module.exports.override("getSQL", function () {
 
 
 module.exports.override("setFromResultSet", function (resultset) {
+    var resultset_column_id = this.getResultSetColumn();
     var json_obj;
 
-    if (!this.query_column) {
-        return;
-    }
     try {
-        json_obj = this.parseBytes(resultset.getBytes(this.query_column));
+        json_obj = this.parseBytes(resultset.getBytes(resultset_column_id));
         this.trace("Flex.setFromResultSet resetting " + this + " to '" + json_obj + "'");
         if (typeof json_obj.id === "string") {
             this.reset(json_obj);
@@ -246,7 +244,6 @@ module.exports.override("setFromResultSet", function (resultset) {
     } catch (e) {
         this.report(e);
         this.getSession().messages.report(e);
-//        new Error();
     }
 });
 

@@ -459,14 +459,14 @@ module.exports.define("getAutoCompleterResultsObj", function (query) {
 });
 
 
-module.exports.override("addColumnToTable", function (query_table, col_spec) {
+module.exports.override("addColumnToTable", function (query_table) {
     var column;
     var sort_cols;
 
     if (!this.ref_entity || !Data.entities.get(this.ref_entity)) {
         this.throwError("invalid ref entity");
     }
-    column = Data.Text.addColumnToTable.call(this, query_table, col_spec);
+    column = Data.Text.addColumnToTable.call(this, query_table);
     if (Data.entities.get(this.ref_entity).reference_sort_order) {
         column.order_term = Data.entities.get(this.ref_entity).reference_sort_order;
     } else {

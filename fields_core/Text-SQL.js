@@ -37,18 +37,13 @@ module.exports.define("getSQL", function () {
 * @param x.sql.Query object, col_spec object, which has its sql_function property set if given
 * @return new column object
 */
-module.exports.define("addColumnToTable", function (query_table, col_spec) {
-    if (!col_spec) {
-        col_spec = { name: this.getId(), };
-    }
-    if (this.sql_function) {
-        col_spec.sql_function = SQL.Connection.detokenizeAlias(this.sql_function,
-            query_table.alias);
-        this.query_column = query_table.alias + "_" + this.id;
-    } else {
-        this.query_column = query_table.alias + "." + this.id;
-    }
-    return query_table.addColumn(col_spec);
+module.exports.define("addColumnToTable", function (query_table) {
+    var col_spec = {
+        name: this.getId(),
+        sql_function: this.sql_function,
+    };
+    this.query_column = query_table.addColumn(col_spec);
+    return this.query_column;
 });
 
 
@@ -57,12 +52,25 @@ module.exports.define("addColumnToTable", function (query_table, col_spec) {
 * @param java.sql.ResultSet object
 */
 module.exports.define("setFromResultSet", function (resultset) {
-    var value = "";
-    if (this.query_column) {
-        value = SQL.Connection.getColumnString(resultset, this.query_column);
-    }
-    this.trace("setFromResultSet[" + this.query_column + "] setting to '" + value + "'");
+    var resultset_column_id = this.getResultSetColumn();
+    var value = SQL.Connection.getColumnString(resultset, resultset_column_id);
+    this.trace("setFromResultSet[" + resultset_column_id + "] setting to '" + value + "'");
     this.setInitial(value);
+});
+
+
+module.exports.define("getResultSetColumn", function () {
+    var resultset_column_id = this.resultset_column_id;
+    if (!resultset_column_id && this.query_column) {
+        if (!this.query_column.isDescendantOf(SQL.Query.Column)) {
+            this.throwError("invalid query_column property: " + this.query_column);
+        }
+        resultset_column_id = this.query_column.name;
+    } else {
+        // this.throwError("neither query_column nor resultset_column_id specified");
+        resultset_column_id = (this.table_alias || "A") + (this.sql_function ? "_" : ".") + this.id;
+    }
+    return resultset_column_id;
 });
 
 

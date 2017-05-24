@@ -106,8 +106,8 @@ module.exports.override("getDBTextExpr", function (alias) {
 });
 
 
-module.exports.override("addColumnToTable", function (query_table, col_spec) {
-    var column = Data.Text.addColumnToTable.call(this, query_table, col_spec);
+module.exports.override("addColumnToTable", function (query_table) {
+    var column = Data.Text.addColumnToTable.call(this, query_table);
     if (this.list) {
         column.order_term = "(SELECT ZI.seq_number FROM sy_list_item ZI WHERE ZI.list = '" + this.list + "' AND ZI.id = " +
             query_table.alias + (this.sql_function ? "_" : ".") + this.id + ")";

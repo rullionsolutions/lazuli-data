@@ -17,7 +17,7 @@ module.exports = Core.Base.clone({
     search_oper_list: "sy.search_oper_list_text",
     auto_search_oper: "CO",
     search_filter: "Filter",
-    table_alias: "A",
+    // table_alias: "A",
     input_type: "text",
     tb_input: "input-sm",
     form_horiz_label_col_size: "col-md-4 col-sm-4",
@@ -63,9 +63,9 @@ module.exports.defbind("resetVal", "cloneInstance", function () {
     this.url = null;
     this.validated = false;                    // private - validated since last significant change?
     this.modified = false;                    // private - modified since original value, or not?
-    if (this.table_alias) {
-        this.query_column = this.table_alias + (this.sql_function ? "_" : ".") + this.id;
-    }
+    // if (this.table_alias) {
+    //     this.query_column = this.table_alias + (this.sql_function ? "_" : ".") + this.id;
+    // }
 });
 
 // ONLY called from FieldSet.addToPage() - IF field is intended to appear on a page

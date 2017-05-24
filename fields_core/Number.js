@@ -163,21 +163,13 @@ module.exports.override("getSQL", function () {
 
 
 module.exports.override("setFromResultSet", function (resultset) {
-    var value;
-    if (!this.query_column) {
-        return;
-    }
-    try {
-        value = String(resultset.getString(this.query_column || this.getId()));
-    } catch (e) {
-        this.throwError("sql get failed");
-    }
-    if (value === "null") {
+    var resultset_column_id = this.getResultSetColumn();
+    var value = SQL.Connection.getColumnString(resultset, resultset_column_id);
+    if (value === null || value === "") {
         value = "";
     } else if (!isNaN(value)) {
         value = String(parseInt(value, 10) / Math.pow(10, this.decimal_digits));
     }
-
     this.trace("setFromResultSet[" + this.query_column + "] setting to " + value);
     this.setInitial(value);
 });
