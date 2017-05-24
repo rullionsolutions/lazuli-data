@@ -36,7 +36,7 @@ module.exports.define("renderMessage", function (msg, parent_elem, render_opts) 
 });
 
 
-module.exports.define("renderErrors", function (parent_elem, server_messages_elem, render_opts) {
+module.exports.define("renderFieldMessages", function (parent_elem, server_messages_elem, render_opts) {
     var messages_elem;
     var i;
     var msg;

@@ -51,6 +51,7 @@ module.exports.define("setRounded", function (new_val) {
 module.exports.defbind("validateNumber", "validate", function () {
     var number_val;
     var decimals = 0;
+    var message;
 
     if (this.val) {
         try {
@@ -77,15 +78,58 @@ module.exports.defbind("validateNumber", "validate", function () {
             ", number_val: " + number_val);
         if (this.isValid()) {
             if (typeof this.min === "number" && !isNaN(this.min) && number_val < this.min) {
+                if (this.min_message) {
+                    message = this.min_message
+                        .replace("{{min}}", this.min)
+                        .replace("{{val}}", this.val);
+                } else {
+                    message = this.val + " is lower than minimum value: " + this.min;
+                }
                 this.messages.add({
                     type: "E",
-                    text: this.val + " is lower than minimum value: " + this.min,
+                    text: message,
+                    cli_side_revalidate: true,
+                });
+            } else if (typeof this.soft_min === "number" && !isNaN(this.soft_min) && number_val < this.soft_min) {
+                if (this.soft_min_message) {
+                    message = this.soft_min_message
+                        .replace("{{min}}", this.soft_min)
+                        .replace("{{val}}", this.val);
+                } else {
+                    message = this.val + " is lower than minimum value: " + this.soft_min;
+                }
+                this.messages.add({
+                    type: "W",
+                    text: message,
                     cli_side_revalidate: true,
                 });
             }
             if (typeof this.max === "number" && !isNaN(this.max) && number_val > this.max) {
-                this.messages.add({ type: "E",
-                    text: this.val + " is higher than maximum value: " + this.max,
+                if (this.max_message) {
+                    message = this.max_message
+                        .replace("{{max}}", this.max)
+                        .replace("{{val}}", this.val);
+                } else {
+                    message = this.val + " is higher than maximum value: " + this.max;
+                }
+
+                this.messages.add({
+                    type: "E",
+                    text: message,
+                    cli_side_revalidate: true,
+                });
+            } else if (typeof this.soft_max === "number" && !isNaN(this.soft_max) && number_val > this.soft_max) {
+                if (this.soft_max_message) {
+                    message = this.soft_max_message
+                        .replace("{{max}}", this.soft_max)
+                        .replace("{{val}}", this.val);
+                } else {
+                    message = this.val + " is higher than maximum value: " + this.soft_max;
+                }
+
+                this.messages.add({
+                    type: "W",
+                    text: message,
                     cli_side_revalidate: true,
                 });
             }

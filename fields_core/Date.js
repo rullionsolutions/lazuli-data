@@ -175,21 +175,61 @@ module.exports.defbind("setInitialInternalDate", "setInitial", function () {
 
 
 module.exports.defbind("validateDate", "validate", function () {
+    var message;
     if (this.val) {                // Only do special validation if non-blank
         if (!this.internal_date) {          // temp fix - I don't know why this isn't already
             this.setInternalDate();         // set whenever required - try again...
         }
         if (this.internal_date) {
             if (this.min && this.val < this.parse(this.min)) {
+                if (this.min_message) {
+                    message = this.min_message
+                        .replace("{{min}}", this.parseDisplay(this.min))
+                        .replace("{{val}}", this.parseDisplay(this.val));
+                } else {
+                    message = "earlier than minimum value: " + this.parseDisplay(this.min);
+                }
                 this.messages.add({
                     type: "E",
-                    text: "earlier than minimum value: " + this.parseDisplay(this.min),
+                    text: message,
+                });
+            } else if (this.soft_min && this.val < this.parse(this.soft_min)) {
+                if (this.soft_min_message) {
+                    message = this.soft_min_message
+                        .replace("{{min}}", this.parseDisplay(this.soft_min))
+                        .replace("{{val}}", this.parseDisplay(this.val));
+                } else {
+                    message = "earlier than minimum value: " + this.parseDisplay(this.soft_min);
+                }
+                this.messages.add({
+                    type: "W",
+                    text: message,
                 });
             }
             if (this.max && this.val > this.parse(this.max)) {
+                if (this.max_message) {
+                    message = this.max_message
+                        .replace("{{max}}", this.parseDisplay(this.max))
+                        .replace("{{val}}", this.parseDisplay(this.val));
+                } else {
+                    message = "later than maximum value: " + this.parseDisplay(this.max);
+                }
+
                 this.messages.add({
                     type: "E",
-                    text: "later than maximum value: " + this.parseDisplay(this.max),
+                    text: message,
+                });
+            } else if (this.soft_max && this.val > this.parse(this.soft_max)) {
+                if (this.soft_max_message) {
+                    message = this.soft_max_message
+                        .replace("{{max}}", this.parseDisplay(this.soft_max))
+                        .replace("{{val}}", this.parseDisplay(this.val));
+                } else {
+                    message = "later than maximum value: " + this.parseDisplay(this.soft_max);
+                }
+                this.messages.add({
+                    type: "W",
+                    text: message,
                 });
             }
         } else {            // not a valid date

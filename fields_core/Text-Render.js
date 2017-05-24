@@ -71,6 +71,8 @@ module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
     var css_class = "form-group css_type_" + css_type;      // control-group in TB2
     if (!this.isValid()) {
         css_class += " has-error";
+    } else if (this.hasWarnings) {
+        css_class += " has-warning";
     } else if (this.isModified()) {
         css_class += " has-success";
     }
@@ -175,7 +177,7 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
     if (this.isEditable() && !render_opts.uneditable) {
         this.renderEditable(div, render_opts, form_type);
         this.addClientSideProperties(div, render_opts);
-        this.renderErrors(div, render_opts);
+        this.renderFieldMessages(div, render_opts);
     } else {
         this.renderUneditable(div, render_opts);
     }
@@ -320,10 +322,9 @@ module.exports.define("renderNavOptions", function (parent_elem, render_opts) {
 * rendered, and render_opts
 * @return text
 */
-module.exports.define("renderErrors", function (parent_elem, render_opts) {
-    this.messages.renderErrors(parent_elem, render_opts);
+module.exports.define("renderFieldMessages", function (parent_elem, render_opts) {
+    this.messages.renderFieldMessages(parent_elem, render_opts);
 });
-
 
 // Used in Reference and File
 module.exports.define("renderDropdownDiv", function (parent_elem, control, tooltip) {

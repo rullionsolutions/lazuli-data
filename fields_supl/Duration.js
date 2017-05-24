@@ -95,6 +95,7 @@ module.exports.define("setPeriodBetween", function (date1, date2, form, inclusiv
 module.exports.defbind("validateDuration", "validate", function () {
     var val = this.get();
     var parts;
+    var message;
 
     if (val) {
         parts = this.getParts(val);
@@ -117,22 +118,71 @@ module.exports.defbind("validateDuration", "validate", function () {
                 });
             }
         } else {
-            parts.period = this.default_period;
-            this.val += this.default_period;
-//            this.raiseError("period part is required");
+            if (this.default_period) {
+                parts.period = this.default_period;
+                this.val += this.default_period;
+            } else {
+                this.messages.add({
+                    type: "E",
+                    text: "period is required",
+                });
+            }
         }
         if (typeof this["max_" + parts.period] === "number" && parts.number > this["max_" + parts.period]) {
+            if (this.max_message) {
+                message = this.max_message
+                    .replace("{{max}}", this["max_" + parts.period])
+                    .replace("{{val}}", parts.number)
+                    .replace("{{period}}", parts.period);
+            } else {
+                message = "maximum period for " + parts.period + " is " + this["max_" + parts.period];
+            }
             this.messages.add({
                 type: "E",
-                text: "maximum period for " + parts.period + " is " + this["max_" + parts.period],
+                text: message,
+            });
+        } else if (typeof this["soft_max_" + parts.period] === "number" && parts.number > this["soft_max_" + parts.period]) {
+            if (this.soft_max_message) {
+                message = this.soft_max_message
+                    .replace("{{max}}", this["soft_max_" + parts.period])
+                    .replace("{{val}}", parts.number)
+                    .replace("{{period}}", parts.period);
+            } else {
+                message = "maximum period for " + parts.period + " is " + this["max_" + parts.period];
+            }
+            this.messages.add({
+                type: "W",
+                text: message,
             });
         }
         if (typeof this["min_" + parts.period] === "number" && parts.number < this["min_" + parts.period]) {
+            if (this.min_message) {
+                message = this.min_message
+                    .replace("{{min}}", this["min_" + parts.period])
+                    .replace("{{val}}", parts.number);
+                    .replace("{{period}}", parts.period);
+            } else {
+                message = "minimum period for " + parts.period + " is " + this["min_" + parts.period];
+            }
             this.messages.add({
                 type: "E",
-                text: "minimum period for " + parts.period + " is " + this["min_" + parts.period],
+                text: message,
+            });
+        } else if (typeof this["soft_min_" + parts.period] === "number" && parts.number < this["soft_min_" + parts.period]) {
+            if (this.min_message) {
+                message = this.min_message
+                    .replace("{{min}}", this["soft_min_" + parts.period])
+                    .replace("{{val}}", parts.number)
+                    .replace("{{period}}", parts.period);
+            } else {
+                message = "minimum period for " + parts.period + " is " + this["soft_min_" + parts.period];
+            }
+            this.messages.add({
+                type: "W",
+                text: message,
             });
         }
+
     }
 });
 
