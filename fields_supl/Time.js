@@ -18,6 +18,10 @@ module.exports = Data.Number.clone({
 //    regex_pattern         : "([0-1][0-9]|2[0-3]):([0-5][0-9])",
     regex_label: "Not a valid time",
     tb_input_list: "input-sm",
+    min_message: "below minimum value: {{min}}",
+    soft_min_message: "below minimum value: {{min}}",
+    max_message: "above minimum value: {{max}}",
+    soft_max_message: "above minimum value: {{max}}",
 });
 
 /**
@@ -65,23 +69,48 @@ module.exports.override("format", function (time) {
     return (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + Math.floor(minutes);
 });
 
+module.exports.override("getBoundMessage", function () {
+    var type;
+    var message;
+    var time = parseInt(this.get(), 10);
+
+    if (this.min && time < this.parse(this.min)) {
+        type = "E";
+        message = this.min_message
+            .replace("{{min}}", this.min);
+    } else if (this.soft_min && time < this.parse(this.soft_min)) {
+        type = "W";
+        message = this.soft_min_message
+            .replace("{{min}}", this.soft_min);
+    } else if (this.max && time > this.parse(this.max)) {
+        type = "E";
+        message = this.max_message
+            .replace("{{max}}", this.max);
+    } else if (this.soft_max && time > this.parse(this.soft_max)) {
+        type = "W";
+        message = this.soft_max_message
+            .replace("{{max}}", this.soft_max);
+    } else {
+        return undefined;
+    }
+
+    message = message.replace("{{val}}", time);
+
+    return {
+        type: type,
+        text: message,
+    }
+});
+
 
 module.exports.defbind("validateTime", "validate", function () {
     var time = parseInt(this.get(), 10);
     // Only do special validation if non-blank and valid
     if (time.toFixed(0) === this.get()) {
         this.text = this.format(time);
-        if (this.min && time < this.parse(this.min)) {
-            this.messages.add({
-                type: "E",
-                text: "below minimum value: " + this.min,
-            });
-        }
-        if (this.max && time > this.parse(this.max)) {
-            this.messages.add({
-                type: "E",
-                text: "above maximum value: " + this.max,
-            });
+        message = this.getBoundMessage();
+        if (message) {
+            this.messages.add(message);
         }
     } else if (!this.isBlank()) {
         this.messages.add({

@@ -102,19 +102,19 @@ module.exports.define("getBoundMessage", function (parts) {
     if (typeof this["max_" + parts.period] === "number" && parts.number > this["max_" + parts.period]) {
         type = "E";
         message = this.max_message
-            .replace("{{max}}", this.max);
+            .replace("{{max}}", this["max_" + parts.period]);
     } else if (typeof this["soft_max_" + parts.period] === "number" && parts.number > this["soft_max_" + parts.period]) {
         type = "W";
         message = this.soft_max_message
-            .replace("{{max}}", this.soft_max);
+            .replace("{{max}}", this["soft_max_" + parts.period]);
     } else if (typeof this["min_" + parts.period] === "number" && parts.number < this["min_" + parts.period]) {
         type = "E";
         message = this.min_message
-            .replace("{{min}}", this.min);
+            .replace("{{min}}", this["min_" + parts.period]);
     } else if (typeof this["soft_min_" + parts.period] === "number" && parts.number < this["soft_min_" + parts.period]) {
         type = "W";
         message = this.soft_min_message
-            .replace("{{min}}", this.soft_min);
+            .replace("{{min}}", this["soft_min_" + parts.period]);
     } else {
         return undefined;
     }
