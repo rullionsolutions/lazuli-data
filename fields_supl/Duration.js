@@ -159,7 +159,7 @@ module.exports.defbind("validateDuration", "validate", function () {
             if (this.min_message) {
                 message = this.min_message
                     .replace("{{min}}", this["min_" + parts.period])
-                    .replace("{{val}}", parts.number);
+                    .replace("{{val}}", parts.number)
                     .replace("{{period}}", parts.period);
             } else {
                 message = "minimum period for " + parts.period + " is " + this["min_" + parts.period];
