@@ -68,6 +68,7 @@ module.exports.define("getResultSetColumn", function () {
         resultset_column_id = this.query_column.name;
     } else {
         // this.throwError("neither query_column nor resultset_column_id specified");
+        // TODO - I don't like this next line - the field is now just guessing!
         resultset_column_id = (this.table_alias || "A") + (this.sql_function ? "_" : ".") + this.id;
     }
     return resultset_column_id;
