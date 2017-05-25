@@ -51,6 +51,39 @@ module.exports.define("setRounded", function (new_val) {
     return this.set(this.round(new_val));
 });
 
+module.exports.define("getBoundMessage", function () {
+    var type;
+    var message;
+    var number_val = Core.Format.parseStrictNumber(this.val);
+
+    if (typeof this.max === "number" && !isNaN(this.max) && number_val > this.max) {
+        type = "E";
+        message = this.max_message
+            .replace("{{max}}", this.max);
+    } else if (typeof this.soft_max === "number" && !isNaN(this.soft_max) && number_val > this.soft_max) {
+        type = "W";
+        message = this.soft_max_message
+            .replace("{{max}}", this.soft_max);
+    } else if (typeof this.min === "number" && !isNaN(this.min) && number_val < this.min) {
+        type = "E";
+        message = this.min_message
+            .replace("{{min}}", this.min);
+    } else if (typeof this.soft_min === "number" && !isNaN(this.soft_min) && number_val < this.soft_min) {
+        type = "W";
+        message = this.soft_min_message
+            .replace("{{min}}", this.soft_min);
+    } else {
+        return undefined;
+    }
+    message = message.replace("{{val}}", this.val)
+
+    return {
+        type: type,
+        text: message,
+        cli_side_revalidate: true,
+    };
+});
+
 
 module.exports.defbind("validateNumber", "validate", function () {
     var number_val;
@@ -81,47 +114,9 @@ module.exports.defbind("validateNumber", "validate", function () {
         this.trace("Validating " + this.toString() + ", val: " + this.val + ", decimal_digits: " + this.decimal_digits +
             ", number_val: " + number_val);
         if (this.isValid()) {
-            if (typeof this.min === "number" && !isNaN(this.min) && number_val < this.min) {
-                message = this.min_message
-                    .replace("{{min}}", this.min)
-                    .replace("{{val}}", this.val);
-
-                this.messages.add({
-                    type: "E",
-                    text: message,
-                    cli_side_revalidate: true,
-                });
-            } else if (typeof this.soft_min === "number" && !isNaN(this.soft_min) && number_val < this.soft_min) {
-                message = this.soft_min_message
-                    .replace("{{min}}", this.soft_min)
-                    .replace("{{val}}", this.val);
-
-                this.messages.add({
-                    type: "W",
-                    text: message,
-                    cli_side_revalidate: true,
-                });
-            }
-            if (typeof this.max === "number" && !isNaN(this.max) && number_val > this.max) {
-                message = this.max_message
-                    .replace("{{max}}", this.max)
-                    .replace("{{val}}", this.val);
-
-                this.messages.add({
-                    type: "E",
-                    text: message,
-                    cli_side_revalidate: true,
-                });
-            } else if (typeof this.soft_max === "number" && !isNaN(this.soft_max) && number_val > this.soft_max) {
-                message = this.soft_max_message
-                    .replace("{{max}}", this.soft_max)
-                    .replace("{{val}}", this.val);
-
-                this.messages.add({
-                    type: "W",
-                    text: message,
-                    cli_side_revalidate: true,
-                });
+            message = this.getBoundMessage();
+            if (this.message) {
+                this.messages.add(message);
             }
         }
     }
