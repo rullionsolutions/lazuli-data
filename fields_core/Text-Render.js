@@ -71,7 +71,7 @@ module.exports.define("getFormGroupCSSClass", function (form_type, editable) {
     var css_class = "form-group css_type_" + css_type;      // control-group in TB2
     if (!this.isValid()) {
         css_class += " has-error";
-    } else if (this.hasWarnings) {
+    } else if (this.hasWarnings()) {
         css_class += " has-warning";
     } else if (this.isModified()) {
         css_class += " has-success";
