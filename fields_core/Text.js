@@ -457,7 +457,7 @@ module.exports.define("isValid", function (modified_only) {
  * To report whether or not there are warnings against this field
  */
 module.exports.define("hasWarnings", function (modified_only) {
-    return this.messages.messages.some(function (message) {
+    return this.messages && this.messages.messages.some(function (message) {
         if (message.type === "W") {
             return true;
         }
