@@ -33,7 +33,7 @@ module.exports.override("renderControl", function (div_elmt, render_opts, form_t
     if (!this.validated) {
         this.validate();
     }
-    if (this.getText() !== this.val) {
+    if (this.getText() !== this.val && this.val) {
         div_elmt.attr("val", this.val);
     }
     style = this.getUneditableCSSStyle();
@@ -54,6 +54,9 @@ module.exports.override("renderControl", function (div_elmt, render_opts, form_t
         }
         if (this.css_cmd) {
             anchor_elmt.attr("id", this.getControl());
+        }
+        if (this.label) {
+            anchor_elmt.attr("title", this.label);
         }
         anchor_elmt.text(this.btn_label, true);
     }
