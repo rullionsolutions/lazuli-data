@@ -177,7 +177,7 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
         this.addClientSideProperties(div, render_opts);
         this.renderErrors(div, render_opts);
     } else {
-        this.renderUneditable(div, render_opts);
+        this.renderUneditable(div, render_opts, form_type);
     }
 });
 
@@ -240,8 +240,8 @@ module.exports.define("getInputSizeCSSClass", function (form_type) {
 * @param the XmlStream object representing the parent div element to which this control should be
 * rendered, and render_opts
 */
-module.exports.define("renderUneditable", function (elem, render_opts) {
-    var span_elem = elem.makeElement("span", "form-control-static");
+module.exports.define("renderUneditable", function (elem, render_opts, form_type) {
+    var span_elem = elem.makeElement("span");
     var url;
     var style;
     var text;
@@ -249,6 +249,9 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
 
     if (!this.validated) {
         this.validate();
+    }
+    if (form_type !== "table-cell") {
+        span_elem.attr("class", "form-control-static");
     }
     if (this.getText() !== this.val) {
         span_elem.attr("val", this.val);
