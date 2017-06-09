@@ -61,7 +61,6 @@ module.exports.define("getMessageManager", function () {
             id: this.id,
             trans: this,
             instance: true,
-            include_field_messages: !this.session.online,
         });
     }
     return this.messages;

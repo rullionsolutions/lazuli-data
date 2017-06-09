@@ -23,17 +23,39 @@ module.exports.override("resetVal", function () {
 });
 
 
-module.exports.override("set", function (new_val) {
-    if (typeof new_val !== "string") {
+module.exports.define("beforeSet", function (val) {
+    if (typeof val !== "string") {
         this.throwError("argument not string: " + this.owner.id + ":" + this.id);
     }
-    if (new_val.length > 1) {
-        new_val = new_val.substr(0, 1);
+    if (val.length > 1) {
+        val = val.substr(0, 1);
     }
-    if (new_val === "") {
-        new_val = "N";
+    if (val === "") {
+        val = "N";
     }
-    return Data.Text.set.call(this, new_val);
+    return val;
+});
+
+
+module.exports.override("setFromParamValue", function (str) {
+    try {
+        str = str.replace(/\|/g, " ");
+        str = Core.Format.parseDateExpressionToDate(str, this.update_format)
+            .format(this.internal_format);
+    } catch (e) {
+        this.debug(e);
+    }
+    this.set(str);
+});
+
+
+module.exports.override("setInitial", function (new_val) {
+    Data.Text.setInitial.call(this, this.beforeSet(new_val));
+});
+
+
+module.exports.override("set", function (new_val) {
+    return Data.Text.set.call(this, this.beforeSet(new_val));
 });
 
 
