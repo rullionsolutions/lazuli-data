@@ -15,6 +15,9 @@ module.exports = Core.Base.clone({
 
 
 module.exports.defbind("setupTextStrings", "clone", function () {
+    if (this.text_strings) {
+        this.throwError("Developer note please declare text_strings in separate file");
+    }
     this.text_strings = {};
     // areas[this.id] = this;
     Data.areas.add(this);
