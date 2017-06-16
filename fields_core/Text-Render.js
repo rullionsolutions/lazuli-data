@@ -332,8 +332,8 @@ module.exports.define("renderErrors", function (parent_elem, render_opts) {
 
 // Used in Reference and File
 module.exports.define("renderDropdownDiv", function (parent_elem, control, tooltip) {
-    var div_elem = parent_elem.makeElement("div",
-        (this.dropdown_button ? "btn-group" : "dropdown"));
+    var div_elem = parent_elem.makeElement("div", (this.dropdown_button ? "btn-group" : "dropdown"));
+
     if (this.dropdown_button) {
         div_elem.makeDropdownButton(control, this.dropdown_label, this.dropdown_url, tooltip,
             this.dropdown_css_class, this.dropdown_right_align);
