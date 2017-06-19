@@ -37,18 +37,6 @@ module.exports.define("beforeSet", function (val) {
 });
 
 
-module.exports.override("setFromParamValue", function (str) {
-    try {
-        str = str.replace(/\|/g, " ");
-        str = Core.Format.parseDateExpressionToDate(str, this.update_format)
-            .format(this.internal_format);
-    } catch (e) {
-        this.debug(e);
-    }
-    this.set(str);
-});
-
-
 module.exports.override("setInitial", function (new_val) {
     Data.Text.setInitial.call(this, this.beforeSet(new_val));
 });
