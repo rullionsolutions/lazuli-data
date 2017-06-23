@@ -453,6 +453,17 @@ module.exports.define("isValid", function (modified_only) {
     return !this.messages.error_recorded;
 });
 
+/**
+ * To report whether or not there are warnings against this field
+ */
+module.exports.define("hasWarnings", function (modified_only) {
+    return this.messages && this.messages.messages.some(function (message) {
+        if (message.type === "W") {
+            return true;
+        }
+        return false;
+    });
+});
 
 /**
 * To report whether or not this field has been modified (by a call to set()), since it was

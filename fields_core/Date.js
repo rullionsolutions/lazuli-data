@@ -23,6 +23,10 @@ module.exports = Data.Text.clone({
     tb_input: "input-sm",
     week_start_day: 0,            // 0 = Sun, 1 = Mon, etc
     error_message: "not a valid date",
+    min_message: "earlier than minimum value: {{min}}",
+    soft_min_message: "earlier than minimum value: {{min}}",
+    max_message: "later than maximum value: {{max}}",
+    soft_max_message: "later than maximum value: {{max}}",
 });
 
 
@@ -173,24 +177,48 @@ module.exports.defbind("setInitialInternalDate", "setInitial", function () {
     this.setInternalDate();
 });
 
+module.exports.define("getBoundMessage", function (parts) {
+    var type;
+    var message;
+
+    if (this.min && this.val < this.parse(this.min)) {
+        type = "E";
+        message = this.min_message
+            .replace("{{min}}", this.parseDisplay(this.min))
+    } else if (this.soft_min && this.val < this.parse(this.soft_min)) {
+        type = "W";
+        message = this.soft_min_message
+            .replace("{{min}}", this.parseDisplay(this.soft_min))
+    } else if (this.max && this.val > this.parse(this.max)) {
+        type = "E";
+        message = this.max_message
+            .replace("{{max}}", this.parseDisplay(this.max))
+    } else if (this.soft_max && this.val > this.parse(this.soft_max)) {
+        type = "W";
+        message = this.soft_max_message
+            .replace("{{max}}", this.parseDisplay(this.soft_max))
+    } else {
+        return undefined;
+    }
+
+    message = message.replace("{{val}}", this.parseDisplay(this.val));
+
+    return {
+        type: type,
+        text: message,
+    };
+});
 
 module.exports.defbind("validateDate", "validate", function () {
+    var message;
     if (this.val) {                // Only do special validation if non-blank
         if (!this.internal_date) {          // temp fix - I don't know why this isn't already
             this.setInternalDate();         // set whenever required - try again...
         }
         if (this.internal_date) {
-            if (this.min && this.val < this.parse(this.min)) {
-                this.messages.add({
-                    type: "E",
-                    text: "earlier than minimum value: " + this.parseDisplay(this.min),
-                });
-            }
-            if (this.max && this.val > this.parse(this.max)) {
-                this.messages.add({
-                    type: "E",
-                    text: "later than maximum value: " + this.parseDisplay(this.max),
-                });
+            message = this.getBoundMessage();
+            if (message) {
+                this.messages.add(message);
             }
         } else {            // not a valid date
             this.messages.add({
@@ -213,7 +241,17 @@ module.exports.override("getTextFromVal", function () {
 module.exports.override("appendClientSideProperties", function (obj) {
     Data.Text.appendClientSideProperties.call(this, obj);
     obj.min = this.min ? Date.parse(this.min) : null;
+    obj.min_message = this.min_message;
+
+    obj.soft_min = this.soft_min ? Date.parse(this.soft_min) : null;
+    obj.soft_min_message = this.soft_min_message;
+
     obj.max = this.max ? Date.parse(this.max) : null;
+    obj.max_message = this.max_message;
+
+    obj.soft_max = this.soft_max ? Date.parse(this.soft_max) : null;
+    obj.soft_max_message = this.soft_max_message;
+
     obj.update_format = this.update_format;
 });
 

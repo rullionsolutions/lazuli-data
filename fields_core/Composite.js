@@ -175,11 +175,11 @@ module.exports.override("renderUneditable", function (div, render_opts) {
 });
 
 
-module.exports.override("renderErrors", function (span, render_opts) {
+module.exports.override("renderFieldMessages", function (span, render_opts) {
     var text = "";
     var delim = "";
     this.each(function (part_field) {
-        text += delim + part_field.renderErrors(span, render_opts);
+        text += delim + part_field.renderFieldMessages(span, render_opts);
         delim = ", ";
     });
     return text;

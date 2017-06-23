@@ -202,9 +202,9 @@ module.exports.override("renderUneditable", function (div, render_opts) {
 });
 
 
-module.exports.override("renderErrors", function (span, render_opts) {
+module.exports.override("renderFieldMessages", function (span, render_opts) {
     if (this.inner_field) {
-        return this.inner_field.renderErrors(span, render_opts);
+        return this.inner_field.renderFieldMessages(span, render_opts);
     }
     return null;
 });
