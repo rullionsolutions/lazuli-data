@@ -23,6 +23,8 @@ module.exports = Data.Text.clone({
     tb_input: "input-sm",
     week_start_day: 0,            // 0 = Sun, 1 = Mon, etc
     error_message: "not a valid date",
+    css_class_input_group: "date",
+    input_group_addon_after: "<span class='glyphicon glyphicon-calendar'></span>",
 });
 
 

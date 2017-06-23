@@ -147,23 +147,22 @@ module.exports.defbind("validateReference", "validate", function () {
         });
                                 // Only do special validation if non-blank
     } else if (val && !this.skip_reference_validation) {
-        try {
-            item = this.lov.getItem(val);
-        } catch (e) {                // val is invalid
-            this.report(e);
-        }
-        if (item) {
-            this.text = item.label;
-        } else if (this.owner && this.owner.trans && this.owner.trans.isActive()
+        if (this.owner && this.owner.trans && this.owner.trans.isActive()
                 && this.owner.trans.isInCache(this.ref_entity, val)) {
             this.text = this.owner.trans.getRow(this.ref_entity, val).getLabel("reference");
         } else {
-            this.text = val;
-            this.messages.add({
-                type: "E",
-                text: "invalid reference: " + val,
-            });
-            this.debug("invalid reference: " + val + " for field " + this);
+            try {
+                item = this.lov.getItem(val);
+                this.text = item.label;
+            } catch (e) {                // val is invalid
+                this.text = val;
+                this.messages.add({
+                    type: "E",
+                    text: "invalid reference: " + val,
+                });
+                this.debug("invalid reference: " + val + " for field " + this);
+                this.report(e);
+            }
         }
     }
 });

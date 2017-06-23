@@ -189,24 +189,29 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
 * @return the XmlStream object representing the control (e.g. input)
 */
 module.exports.define("renderEditable", function (div, render_opts, form_type) {
-    var css_class = "input-group";
-    if (this.input_group_addon_before || this.input_group_addon_after || this.input_group_size) {
-        if (this.input_group_size) {
-            css_class += " " + this.input_group_size;
-        }
-        div = div.makeElement("div", css_class);
-        // div = div.makeElement("div", (this.input_group_addon_before ? "input-prepend " : "") +
-        // (this.input_group_addon_after ? "input-append " : ""));
+    if (this.input_group_addon_before || this.input_group_addon_after
+            || this.input_group_size || this.css_class_input_group) {
+        div = div.makeElement("div", this.getInputGroupCSSClass(form_type));
     }
     if (this.input_group_addon_before) {
-        div.makeElement("div", "input-group-addon").text(this.input_group_addon_before);
-        // div.makeElement("span", "add-on").text(this.input_group_addon_before);
+        div.makeElement("span", "input-group-addon").text(this.input_group_addon_before, true, true);
     }
     this.renderUpdateControls(div, render_opts, form_type);
     if (this.input_group_addon_after) {
-        div.makeElement("div", "input-group-addon").text(this.input_group_addon_after);
-        // div.makeElement("span", "add-on").text(this.input_group_addon_after);
+        div.makeElement("span", "input-group-addon").text(this.input_group_addon_after, true, true);
     }
+});
+
+
+module.exports.define("getInputGroupCSSClass", function (form_type) {
+    var css_class = "input-group";
+    if (this.input_group_size) {
+        css_class += " " + this.input_group_size;
+    }
+    if (this.css_class_input_group) {
+        css_class += " " + this.css_class_input_group;
+    }
+    return css_class;
 });
 
 
@@ -327,8 +332,8 @@ module.exports.define("renderErrors", function (parent_elem, render_opts) {
 
 // Used in Reference and File
 module.exports.define("renderDropdownDiv", function (parent_elem, control, tooltip) {
-    var div_elem = parent_elem.makeElement("div",
-        (this.dropdown_button ? "btn-group" : "dropdown"));
+    var div_elem = parent_elem.makeElement("div", (this.dropdown_button ? "btn-group" : "dropdown"));
+
     if (this.dropdown_button) {
         div_elem.makeDropdownButton(control, this.dropdown_label, this.dropdown_url, tooltip,
             this.dropdown_css_class, this.dropdown_right_align);
