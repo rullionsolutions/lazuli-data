@@ -150,14 +150,14 @@ module.exports.define("getKey", function () {
 
 module.exports.define("getLabel", function (pattern_type) {
     var pattern = this["label_pattern_" + pattern_type] || this.label_pattern;
-    var out;
+    var out = "";
 
     if (pattern) {
         out = this.detokenize(pattern);
     } else if (this.title_field) {
         out = this.getField(this.title_field).getText();
     }
-    return out || "(ERROR: no label defined for " + this.id + ")";
+    return out;
 });
 
 
