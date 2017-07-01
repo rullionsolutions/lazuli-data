@@ -25,7 +25,7 @@ module.exports = Core.Base.clone({
     min_col_width: "100px",
     min_parts_expected: 1,
     max_parts_expected: 1,
-    unicode_icon: "&#x27BD;",              // Heavy Wedge-Tailed Rightwards Arrow; x25B7 = open right-pointing triangle
+    unicode_icon: "&#x27BD; ",              // Heavy Wedge-Tailed Rightwards Arrow; x25B7 = open right-pointing triangle
     unicode_icon_class: "css_uni_icon",
     hover_text_icon: "&#x24D8;",
     text_pattern: "{val}",

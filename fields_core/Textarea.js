@@ -58,17 +58,15 @@ module.exports.override("renderUpdateControls", function (div, render_opts, form
 
 
 module.exports.override("renderUneditable", function (elem, render_opts, inside_table) {
-    var div_elem = elem.makeElement("div", "form-control-static");
     var style = this.getUneditableCSSStyle();
-
     if (!this.validated) {
         this.validate();
     }
     if (style) {
-        div_elem.attribute("style", style);
+        elem.attribute("style", style);
     }
     if (this.getText()) {
-        div_elem.text(this.getText(), this.css_richtext);        // don't escape markup if richtext
+        elem.text(this.getText(), this.css_richtext);        // don't escape markup if richtext
     }
 });
 
