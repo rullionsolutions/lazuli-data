@@ -99,7 +99,6 @@ module.exports.define("getTickLabel", function (i) {
 
 module.exports.override("renderUneditable", function (elem, render_opts) {
     var inner;
-
     if (this.isBlank()) {
         return;
     }

@@ -130,10 +130,7 @@ module.exports.define("getFlexboxSize", function () {
     if (this.data_length >= 80) {
         return 6;
     }
-    if (this.data_length >= 20) {
-        return 4;
-    }
-    return 2;
+    return 4;
 });
 
 
@@ -177,6 +174,9 @@ module.exports.define("renderControl", function (div, render_opts, form_type) {
         this.addClientSideProperties(div, render_opts);
         this.renderErrors(div, render_opts);
     } else {
+        if (form_type !== "table-cell") {
+            div = div.makeElement("div", "form-control-static");
+        }
         this.renderUneditable(div, render_opts);
     }
 });
@@ -246,7 +246,6 @@ module.exports.define("getInputSizeCSSClass", function (form_type) {
 * rendered, and render_opts
 */
 module.exports.define("renderUneditable", function (elem, render_opts) {
-    var span_elem = elem.makeElement("span", "form-control-static");
     var url;
     var style;
     var text;
@@ -256,28 +255,28 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
         this.validate();
     }
     if (this.getText() !== this.val) {
-        span_elem.attr("val", this.val);
+        elem.attr("val", this.val);
     }
     style = this.getUneditableCSSStyle();
     if (style) {
-        span_elem.attr("style", style);
+        elem.attr("style", style);
     }
     url = this.getURL();
     text = this.getText();
     if (render_opts.dynamic_page !== false) {
-        nav_options = this.renderNavOptions(span_elem, render_opts);
+        nav_options = this.renderNavOptions(elem, render_opts);
     }
     if (url && !nav_options && render_opts.show_links !== false) {
-        span_elem = span_elem.makeElement("a");
-        span_elem.attr("href", url);
+        elem = elem.makeElement("a");
+        elem.attr("href", url);
         if (this.url_target) {
-            span_elem.attr("target", this.url_target);
+            elem.attr("target", this.url_target);
         }
         if (this.unicode_icon) {
-            span_elem.makeElement("span", this.unicode_icon_class)
+            elem.makeElement("span", this.unicode_icon_class)
                 .text(this.unicode_icon, true);
         } else if (this.button_class) {            // Render URL Field as button
-            span_elem.attr("class", this.button_class);
+            elem.attr("class", this.button_class);
         }
         if (this.url_link_text && !this.isBlank()) {
             text = this.url_link_text;
@@ -286,7 +285,7 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
     if (text) {
         if (!render_opts.hide_images) {     // CL - Image don't tend to render in excel exports
             if (this.decoration_icon) {     // CL - I think HttpServer.escape renders this useless
-                span_elem.text(this.decoration_icon, true);
+                elem.text(this.decoration_icon, true);
             }
 //            if (this.icon) {
 //                elem.addChild("img")
@@ -294,7 +293,7 @@ module.exports.define("renderUneditable", function (elem, render_opts) {
 //                    .attribute("src", this.icon);
 //            }
         }
-        span_elem.text(text);
+        elem.text(text);
     }
 });
 
